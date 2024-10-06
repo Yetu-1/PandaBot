@@ -1,6 +1,7 @@
+import { EachMessagePayload } from "kafkajs";
 import { redpanda } from "./redpanda_config.ts";
 
-const groupId = process.env.GROUP_ID || "default-group";
+const groupId = process.env.GROUP_ID || "default-groupy";
 const topic = process.env.FILTER_DISCORD_TOPIC || "filter_discord_messages";
 const consumer = redpanda.consumer({ groupId });
 export async function connect(handleMessage?: (message: any) => Promise<void>) {
@@ -8,7 +9,11 @@ export async function connect(handleMessage?: (message: any) => Promise<void>) {
     await consumer.connect();
     await consumer.subscribe({ topic: topic });
     await consumer.run({
-      eachMessage: async ({ topic, partition, message }) => {
+      eachMessage: async ({
+        topic,
+        partition,
+        message,
+      }: EachMessagePayload) => {
         const formattedValue = JSON.parse((message.value as Buffer).toString());
         if (handleMessage) {
           await handleMessage(formattedValue);
