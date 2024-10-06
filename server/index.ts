@@ -13,6 +13,7 @@ const client = new Client({
 
 env.config();
 
+
 client.login(process.env.DISCORD_TOKEN);
 
 client.on("messageCreate", async (message) => {
