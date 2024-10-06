@@ -34,6 +34,6 @@ KafkaConsumer.connect(async (message) => {
 
   const channel = await client.channels.fetch(messageObject.message.channelId);
 
-  //   channel?.isSendable() && (await channel.send(messageObject.message.content));
+  //   channel?.isSendable() && (await channel.send(messageObject.message.content)); // this is where the filtering should happen
   console.log("Received message:", channel);
 });
