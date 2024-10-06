@@ -1,4 +1,4 @@
-import { redpanda } from "./redpanda_config.ts";
+import { redpanda } from "./redpanda_config.js";
 import { Message } from "discord.js";
 
 const topic = process.env.FILTER_DISCORD_TOPIC || "filter-discord";
