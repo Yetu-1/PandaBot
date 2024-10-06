@@ -24,8 +24,8 @@ client.on("messageCreate", async (message) => {
     if(!message?.author.bot) {
         if(toxicity > 60) {
             message.channel.send(`WARNING!! Toxic Language @${message.author.globalName}`) // echo back message
+            message.delete();
         }
-        message.delete();
     }
 });
 
