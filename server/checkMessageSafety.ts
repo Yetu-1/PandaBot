@@ -6,7 +6,7 @@ env.config();
 const discovery_url: string = String(process.env.DISCOVERY_URL);
 
 
-async function checkTextSafety(msg: string) {
+async function checkMsgSafety(msg: string) {
     try {
         const client: any = await google.discoverAPI(discovery_url);
 
@@ -34,4 +34,4 @@ async function checkTextSafety(msg: string) {
 
 }
 
-export {checkTextSafety}
+export {checkMsgSafety}
