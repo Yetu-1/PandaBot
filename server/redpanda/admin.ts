@@ -1,4 +1,4 @@
-import { redpanda } from "./redpanda_config";
+import { redpanda } from "./redpanda_config.ts";
 
 const admin = redpanda.admin();
 export async function createTopic(

@@ -1,4 +1,4 @@
-import { redpanda } from "./redpanda_config";
+import { redpanda } from "./redpanda_config.ts";
 
 const groupId = process.env.GROUP_ID || "default-group";
 const topic = process.env.FILTER_DISCORD_TOPIC || "filter_discord_messages";

@@ -17,6 +17,7 @@ const client = new Client({
 env.config();
 
 KafkaAdmin.createTopic("filter-discord");
+console.log("Created topic filter-discord1");
 
 client.login(process.env.DISCORD_TOKEN);
 
@@ -24,6 +25,7 @@ client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
   const sendMessage = await KafkaProducer.getConnection();
+  //   message.channel.send(`Echo ${message.content}`);
   if (sendMessage) {
     await sendMessage(message);
   }
