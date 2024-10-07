@@ -1,25 +1,39 @@
 import env from "dotenv";
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, GatewayIntentBits, Message } from "discord.js";
+import * as KafkaAdmin from "./redpanda/admin.js";
+import * as KafkaProducer from "./redpanda/producer.js";
+import * as KafkaConsumer from "./redpanda/consumer.js";
 
 const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.DirectMessages,
-        GatewayIntentBits.MessageContent,
-    ],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 env.config();
 
+KafkaAdmin.createTopic("filter-discord");
 
 client.login(process.env.DISCORD_TOKEN);
 
 client.on("messageCreate", async (message) => {
-    console.log(message);
+  if (message.author.bot) return;
 
-    if(!message?.author.bot) {
-        message.channel.send(`Echo ${message.content}`) // echo back message
-    }
+  const sendMessage = await KafkaProducer.getConnection();
+  if (sendMessage) {
+    await sendMessage(message);
+  }
+});
+
+KafkaConsumer.connect(async (message) => {
+  const messageObject = JSON.parse(message.value?.toString() || "{}");
+
+  const channel = await client.channels.fetch(messageObject.message.channelId);
+
+  //   channel?.isSendable() && (await channel.send(messageObject.message.content)); // this is where the filtering should happen
+  console.log("Received message:", channel);
 });
