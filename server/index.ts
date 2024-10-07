@@ -1,6 +1,5 @@
 import env from "dotenv";
 import { Client, GatewayIntentBits } from "discord.js";
-import {google} from 'googleapis';
 import { checkMsgSafety } from "./checkMessageSafety.js";
 
 const client = new Client({
@@ -28,30 +27,3 @@ client.on("messageCreate", async (message) => {
         }
     }
 });
-
-// const discovery_url: string = String(process.env.DISCOVERY_URL);
-
-// google.discoverAPI(discovery_url)
-//     .then((client: any) => {
-//       const analyzeRequest = {
-//         comment: {
-//           text: 'Jiminy cricket! Well gosh pussy it! Oh damn it all!',
-//         },
-//         requestedAttributes: {
-//           TOXICITY: {},
-//         },
-//       };
-
-//       client.comments.analyze(
-//           {
-//             key: process.env.GOOGLE_API_KEY,
-//             resource: analyzeRequest,
-//           },
-//           (err: any, response: any) => {
-//             if (err) throw err;
-//             console.log(JSON.stringify(response.data, null, 2));
-//           });
-// })
-// .catch(err => {
-//     throw err;
-// });
