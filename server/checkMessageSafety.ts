@@ -6,7 +6,7 @@ env.config();
 const discovery_url: string = String(process.env.DISCOVERY_URL);
 
 
-async function checkMsgSafety(msg: string) {
+export async function checkMsgSafety(msg: string) {
     try {
         const client: any = await google.discoverAPI(discovery_url);
 
@@ -25,7 +25,7 @@ async function checkMsgSafety(msg: string) {
                 resource: analyzeRequest,
         });
         
-        console.log(JSON.stringify(response.data, null, 2));
+        // console.log(JSON.stringify(response.data, null, 2));
         const toxicity: number = response.data.attributeScores.TOXICITY.summaryScore.value;
         return toxicity * 100;
     }catch(err) {
@@ -33,5 +33,3 @@ async function checkMsgSafety(msg: string) {
     }
 
 }
-
-export {checkMsgSafety}
