@@ -1,10 +1,10 @@
 import env from "dotenv";
 import { Client, GatewayIntentBits, Message } from "discord.js";
-import * as KafkaAdmin from "./redpanda/admin.js";
-import * as KafkaProducer from "./redpanda/producer.js";
-import * as KafkaConsumer from "./redpanda/consumer.js";
+import * as Admin from "./redpanda/admin.js";
+import * as Producer from "./redpanda/producer.js";
+import * as Consumer from "./redpanda/consumer.js";
 
-const client = new Client({
+export const discord_client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
@@ -16,24 +16,45 @@ const client = new Client({
 
 env.config();
 
-KafkaAdmin.createTopic("filter-discord");
-
-client.login(process.env.DISCORD_TOKEN);
-
-client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
-
-  const sendMessage = await KafkaProducer.getConnection();
-  if (sendMessage) {
-    await sendMessage(message);
+async function setupServer() {
+  try {
+    // Create topic
+    const topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
+    await Admin.createTopic(topic);
+    // Connect producer to repanda broker 
+    await Producer.connect();
+    // Initialize consumner to repanda broker and subscribe to specified topic to consume messages
+    await Consumer.init();
+    // Login discord bot 
+    discord_client.login(process.env.DISCORD_TOKEN);
+  } catch (error) {
+    console.error("Error:", error);
   }
+}
+
+setupServer();
+
+discord_client.on("messageCreate", async (message) => {
+  if (message.author.bot) return;
+  try {
+    await Producer.sendMessage(message);
+  } catch (error) {
+    console.error("Error:", error);
+  }
+
 });
 
-KafkaConsumer.connect(async (message) => {
-  const messageObject = JSON.parse(message.value?.toString() || "{}");
-
-  const channel = await client.channels.fetch(messageObject.message.channelId);
-
-  //   channel?.isSendable() && (await channel.send(messageObject.message.content)); // this is where the filtering should happen
-  console.log("Received message:", channel);
+process.on("SIGINT", async () => {
+  console.log('Closing app...');
+  try {
+    // Disconnect producer and consumer from repanda broker
+    await Producer.disconnect();
+    await Consumer.disconnect();
+  } catch (err) {
+    console.error('Error during cleanup:', err);
+    process.exit(1);
+  } finally {
+    console.log('Cleanup finished. Exiting');
+    process.exit(0);
+  }
 });

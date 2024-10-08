@@ -1,11 +1,7 @@
 import { redpanda } from "./redpanda_config.js";
 
 const admin = redpanda.admin();
-export async function createTopic(
-  topic: string,
-  partitions?: number,
-  replicas?: number
-) {
+export async function createTopic( topic: string, partitions?: number, replicas?: number ) {
   await admin.connect();
   const existingTopics = await admin.listTopics();
   if (!existingTopics.includes(topic)) {
