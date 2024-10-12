@@ -16,16 +16,32 @@ export const discord_client = new Client({
 
 env.config();
 
+async function sendMessage(content: string, channelId: string) {
+  try {
+    if (!channelId) {
+      throw new Error(
+        "CHANNEL_ID is not defined in the environment variables."
+      );
+    }
+    const channel = await discord_client.channels.fetch(channelId);
+    if (channel && channel.isSendable()) {
+      await channel.send(content);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
 async function setupServer() {
   try {
     // Create topic
     const topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
     await Admin.createTopic(topic);
-    // Connect producer to repanda broker 
+    // Connect producer to repanda broker
     await Producer.connect();
     // Initialize consumner to repanda broker and subscribe to specified topic to consume messages
     await Consumer.init();
-    // Login discord bot 
+    // Login discord bot
     discord_client.login(process.env.DISCORD_TOKEN);
   } catch (error) {
     console.error("Error:", error);
@@ -41,7 +57,6 @@ discord_client.on("messageCreate", async (message) => {
   } catch (error) {
     console.error("Error:", error);
   }
-
 });
 
 process.on("SIGINT", async () => {
