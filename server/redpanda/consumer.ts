@@ -1,6 +1,6 @@
 import { redpanda } from "./redpanda_config.js";
 import { discord_client } from "../index.js";
-import { checkMsgSafety } from "../checkMessageSafety.js";
+import { checkMsgSafety } from "../services/checkMessageSafety.js";
 import env from "dotenv"
 import { TextChannel } from "discord.js";
 
