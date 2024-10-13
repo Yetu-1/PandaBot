@@ -1,20 +1,10 @@
 import env from "dotenv";
-import { Client, GatewayIntentBits, Message } from "discord.js";
-import * as Admin from "./redpanda/admin.js";
-import * as Producer from "./redpanda/producer.js";
 import * as Consumer from "./redpanda/consumer.js";
-import OpenAI from "openai";
+import * as Producer from "./redpanda/producer.js";
+import { discord_client } from "./services/config.js";
+import { createQuizMessage } from "./services/createDiscordQuestion.js";
 import { generateQuiz } from "./services/generateQuiz.js";
-
-export const discord_client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.DirectMessages,
-    GatewayIntentBits.MessageContent,
-  ],
-});
+import { Quiz } from "./services/models.js";
 
 async function sendMessage(content: string, channelId: string) {
   try {
@@ -26,6 +16,28 @@ async function sendMessage(content: string, channelId: string) {
     const channel = await discord_client.channels.fetch(channelId);
     if (channel && channel.isSendable()) {
       await channel.send(content);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+async function sendDiscordQuiz(
+  messageObj: {
+    embeds: any;
+    components: any;
+  },
+  channelId: string
+) {
+  try {
+    if (!channelId) {
+      throw new Error(
+        "CHANNEL_ID is not defined in the environment variables."
+      );
+    }
+    const channel = await discord_client.channels.fetch(channelId);
+    if (channel && channel.isSendable()) {
+      await channel.send(messageObj);
     }
   } catch (error) {
     console.error("Error:", error);
@@ -56,8 +68,17 @@ discord_client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   try {
     if (message.attachments.size > 0) {
-      const quiz = await generateQuiz(message);
-      sendMessage(quiz, message.channel.id);
+      console.log("Message has attachments");
+      const quizStr = await generateQuiz(message);
+      const quiz: Quiz = JSON.parse(quizStr); //
+      const discordQuestions: {
+        embeds: any;
+        components: any;
+      }[] = quiz.questions.map((q) => createQuizMessage(q));
+
+      discordQuestions.forEach((q) => {
+        sendDiscordQuiz(q, message.channel.id);
+      });
       console.log(quiz);
     }
     // await Producer.sendMessage(message);

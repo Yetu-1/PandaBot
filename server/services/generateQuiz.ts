@@ -1,22 +1,15 @@
-import OpenAI from "openai";
-import env from "dotenv";
-import fs, { open } from "fs";
 import axios from "axios";
+import { Message } from "discord.js";
+import env from "dotenv";
+import fs from "fs";
+import OpenAI from "openai";
 import { Assistant } from "openai/resources/beta/assistants.mjs";
 import { ThreadCreateParams } from "openai/resources/beta/index.mjs";
-import { Thread } from "openai/src/resources/beta/index.js";
-import { Message } from "discord.js";
 import { FileObject } from "openai/resources/files.mjs";
+import { ThreadObj } from "./models.js";
 
 env.config();
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const openai = new OpenAI();
-
-interface ThreadObj {
-  thread: Thread;
-  messageFiles: FileObject[];
-}
 
 async function downloadFile(uri: string, fileName: string): Promise<string> {
   const response = await axios.get(uri, { responseType: "stream" });
@@ -103,20 +96,12 @@ async function createThread(message: Message): Promise<ThreadObj> {
     content: `
       You are a helpful assistant That creates multiple choice quizes, 5 questions with 4 
                 answer options from attached documents and returns an array of questions in this format: 
-                {
-                status: "success",
-                questions: [
-                  {
-                    question: "",
-                    options: [
-                      "Orange", "Pink", "Blue", "Green"
-                    ],
-                    answer: "Orange"
-                  }
-                ]}
+                {"status": "success", "questions": [{"question": "", "options": ["Orange", "Pink", "Blue", "Green"], "answer": "Orange"}]}
                   Please only respond in the provided format nothing more nothing less
                   no code blocks please just raw strings
-                  if you're unable to genrate questions just output an empty array for questions and status: "failed"
+                  if you're unable to generate questions just output an empty array for questions and status: "failed"
+                  The failed format should include reasonForFailure in the following format:
+                  {"status": "failed", "questions": [], "reasonForFailure": "reason"}
                 `,
   };
 
@@ -145,6 +130,7 @@ async function deleteFiles(fileIds: string[]): Promise<boolean> {
 }
 
 async function generateQuiz(discordMessage: Message): Promise<string> {
+  console.log("Generating quiz");
   let files: FileObject[] = [];
   try {
     const assistant = await createQuizAssistant();
