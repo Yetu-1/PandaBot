@@ -18,14 +18,6 @@ interface ThreadObj {
   messageFiles: FileObject[];
 }
 
-async function downloadFiles(
-  uriAndFIleNames: { uri: string; fileName: string }[]
-): Promise<string[]> {
-  return Promise.all(
-    uriAndFIleNames.map(({ uri, fileName }) => downloadFile(uri, fileName))
-  );
-}
-
 async function downloadFile(uri: string, fileName: string): Promise<string> {
   const response = await axios.get(uri, { responseType: "stream" });
   const dir = "services/tmp";
