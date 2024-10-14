@@ -5,7 +5,7 @@ import axios from "axios";
 import { Assistant } from "openai/resources/beta/assistants.mjs";
 import { ThreadCreateParams } from "openai/resources/beta/index.mjs";
 import { Thread } from "openai/src/resources/beta/index.js";
-import { Message } from "discord.js";
+import { Message, CommandInteractionOption } from "discord.js";
 import { FileObject } from "openai/resources/files.mjs";
 
 env.config();
@@ -15,7 +15,7 @@ const openai = new OpenAI();
 
 interface ThreadObj {
   thread: Thread;
-  messageFiles: FileObject[];
+  quizFiles: FileObject[];
 }
 
 async function downloadFile(uri: string, fileName: string): Promise<string> {
@@ -43,24 +43,6 @@ async function downloadFile(uri: string, fileName: string): Promise<string> {
   });
 }
 
-async function uploadFilesToVectorStore(uri: string[]): Promise<string> {
-  const fileStreams = uri.map((path) => fs.createReadStream(path));
-
-  let vectorStore = await openai.beta.vectorStores.create({
-    name: "Quiz docs",
-    expires_after: {
-      anchor: "last_active_at",
-      days: 7,
-    },
-  });
-
-  await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStore.id, {
-    files: fileStreams,
-  });
-
-  return vectorStore.id;
-}
-
 async function createQuizAssistant(): Promise<Assistant> {
   return await openai.beta.assistants.create({
     name: "Quiz Assistant",
@@ -81,20 +63,24 @@ async function createQuizAssistant(): Promise<Assistant> {
   });
 }
 
-async function createThread(message: Message): Promise<ThreadObj> {
-  const messageFiles = await Promise.all(
-    message.attachments.map(async ({ name, url }) => {
-      const path = await downloadFile(url, name);
-      return await openai.files.create({
-        file: fs.createReadStream(path),
-        purpose: "assistants",
-      });
+async function createThread(files: CommandInteractionOption[]): Promise<ThreadObj> {
+  const quizFiles = await Promise.all(
+    files.map(async ( { attachment } ) => {
+      if(attachment) { // Make sure attachment exists
+        const path = await downloadFile(attachment.url, attachment.name);
+        return await openai.files.create({
+          file: fs.createReadStream(path),
+          purpose: "assistants",
+        });
+      }else {
+        return {} as FileObject;
+      }
     })
   );
-
-  const attachments = messageFiles.map(
+  
+  const attachments = quizFiles.map(
     (file): ThreadCreateParams.Message.Attachment => {
-      return { file_id: file.id, tools: [{ type: "file_search" }] };
+      return { file_id: file?.id, tools: [{ type: "file_search" }] };
     }
   );
 
@@ -122,7 +108,7 @@ async function createThread(message: Message): Promise<ThreadObj> {
 
   const userMessage: ThreadCreateParams.Message = {
     role: "user",
-    content: "This is the user message: " + message.content,
+    content: "This is the user message: ",
     attachments: attachments,
   };
 
@@ -132,7 +118,7 @@ async function createThread(message: Message): Promise<ThreadObj> {
 
   const thread = await openai.beta.threads.create(threadCreateParams);
 
-  return { thread, messageFiles };
+  return { thread, quizFiles };
 }
 
 async function deleteFiles(fileIds: string[]): Promise<boolean> {
@@ -144,12 +130,13 @@ async function deleteFiles(fileIds: string[]): Promise<boolean> {
   );
 }
 
-async function generateQuiz(discordMessage: Message): Promise<string> {
+async function generateQuiz(attachment: CommandInteractionOption[]): Promise<string> {
+  
   let files: FileObject[] = [];
   try {
     const assistant = await createQuizAssistant();
-    const { thread, messageFiles } = await createThread(discordMessage);
-    files = messageFiles;
+    const { thread, quizFiles } = await createThread(attachment);
+    files = quizFiles;
 
     const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
       assistant_id: assistant.id,
