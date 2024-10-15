@@ -1,10 +1,11 @@
 import env from "dotenv";
-import { Client, GatewayIntentBits, Message } from "discord.js";
-import * as Admin from "./redpanda/admin.js";
+import { Client, CommandInteractionOption, GatewayIntentBits } from "discord.js";
 import * as Producer from "./redpanda/producer.js";
 import * as Consumer from "./redpanda/consumer.js";
-import OpenAI from "openai";
 import { generateQuiz } from "./services/generateQuiz.js";
+import { registerCommands } from "./services/registerCommands.js";
+
+env.config();
 
 export const discord_client = new Client({
   intents: [
@@ -32,8 +33,6 @@ async function sendMessage(content: string, channelId: string) {
   }
 }
 
-env.config();
-
 async function setupServer() {
   // try {
   //   // Create topic
@@ -56,13 +55,37 @@ discord_client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   try {
     if (message.attachments.size > 0) {
-      const quiz = await generateQuiz(message);
-      sendMessage(quiz, message.channel.id);
-      console.log(quiz);
+      // const quiz = await generateQuiz(message);
+      // sendMessage(quiz, message.channel.id);
+      // console.log(quiz);
     }
     // await Producer.sendMessage(message);
   } catch (error) {
     console.error("Error:", error);
+  }
+});
+
+discord_client.on("interactionCreate", async (interaction) => {
+  // check if interaction is not a slash command
+  if (!interaction.isChatInputCommand()) return;
+
+  if(interaction.commandName == 'start-quiz') {
+    // Get all options
+    const file1 = interaction.options.get('file1');
+    const file2 = interaction.options.get('file2');
+    const duration = interaction.options.get('duration') || { name: 'duration', type: 10, value: 0 }
+
+    interaction.reply(`The quiz is about to start. Duration: ${duration.value}!`);
+
+    if(file1 && file1.attachment) {
+      const files: CommandInteractionOption[] = [];
+      files.push(file1);
+      if(file2 && file2.attachment) // if the second file exists
+        files.push(file2);
+      const quiz = await generateQuiz(files);
+      await sendMessage(quiz, interaction.channelId);
+      console.log(quiz);
+    }
   }
 });
 
