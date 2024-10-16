@@ -91,18 +91,19 @@ async function createThread(files: CommandInteractionOption[]): Promise<ThreadOb
                 answer options from attached documents and returns an array of questions in this format: 
                 {
                 status: "success",
+                title: "",
                 questions: [
                   {
-                    question: "",
+                    question: "what is the color of an orange",
                     options: [
                       "Orange", "Pink", "Blue", "Green"
                     ],
-                    answer: "Orange"
+                    answer: 1 (i.e can be option 1 - 4 depending on which option is right)
                   }
                 ]}
                   Please only respond in the provided format nothing more nothing less
                   no code blocks please just raw strings
-                  if you're unable to genrate questions just output an empty array for questions and status: "failed"
+                  if you're unable to genrate questions just output an empty array for questions and status: "failed". add a title based on the content of the quiz
                 `,
   };
 
@@ -130,7 +131,7 @@ async function deleteFiles(fileIds: string[]): Promise<boolean> {
   );
 }
 
-async function generateQuiz(attachment: CommandInteractionOption[]): Promise<string> {
+async function generateQuiz(attachment: CommandInteractionOption[]): Promise<any> {
   
   let files: FileObject[] = [];
   try {
@@ -149,13 +150,13 @@ async function generateQuiz(attachment: CommandInteractionOption[]): Promise<str
     const message = messages.data.pop()!;
     if (message.content[0].type === "text") {
       const { text } = message.content[0];
-      console.log(text.value);
-      return text.value;
+      console.log(JSON.parse(text.value));
+      return JSON.parse(text.value);
     }
-    return "";
+    return {status: "failed", Error: "No text content"};
   } catch (err) {
     console.error("Error", err);
-    return "";
+    return {status: "failed", Error: "err"};
   } finally {
     console.log("finally");
     if (files.length > 0) {
