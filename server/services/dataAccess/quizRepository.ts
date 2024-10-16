@@ -52,7 +52,7 @@ export async function saveQuiz(quiz: Quiz, channel_id: string) {
     }
 }
 
-async function createQuizEntry(quiz: QuizEntry) {
+async function createQuizEntry(quiz: QuizEntry): Promise<boolean>{
     console.log(quiz)
     try {
         await db.query("INSERT INTO quiz (quiz_id, quiz_title, channel_id) VALUES ($1, $2, $3)", [quiz.id, quiz.title, quiz.channel_id])

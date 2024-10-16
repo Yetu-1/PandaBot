@@ -21,9 +21,9 @@ CREATE TABLE user_answer (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(20),
     quiz_id uuid REFERENCES quiz(quiz_id) ON DELETE CASCADE,
-    question_id INTEGER,
+    question_number INTEGER,
     answer INTEGER,
-    CONSTRAINT unique_user_answer UNIQUE (user_id, quiz_id, question_id)
+    CONSTRAINT unique_user_answer UNIQUE (user_id, quiz_id, question_number)
 );
 
 -- scores table 
