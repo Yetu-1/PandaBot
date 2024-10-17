@@ -14,5 +14,6 @@ export interface QuizQuestion {
 
 export interface Quiz {
   status: "success" | "failure";
+  id: string;
   questions: QuizQuestion[];
 }
