@@ -1,22 +1,16 @@
-import OpenAI from "openai";
-import env from "dotenv";
-import fs, { open } from "fs";
 import axios from "axios";
+import env from "dotenv";
+import fs from "fs";
+import OpenAI from "openai";
 import { Assistant } from "openai/resources/beta/assistants.mjs";
 import { ThreadCreateParams } from "openai/resources/beta/index.mjs";
 import { Thread } from "openai/src/resources/beta/index.js";
 import { Message, CommandInteractionOption } from "discord.js";
 import { FileObject } from "openai/resources/files.mjs";
+import { ThreadObj } from "./models.js";
 
 env.config();
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const openai = new OpenAI();
-
-interface ThreadObj {
-  thread: Thread;
-  quizFiles: FileObject[];
-}
 
 async function downloadFile(uri: string, fileName: string): Promise<string> {
   const response = await axios.get(uri, { responseType: "stream" });
