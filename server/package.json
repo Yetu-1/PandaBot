@@ -23,7 +23,13 @@
     "googleapis": "^144.0.0",
     "kafkajs": "^2.2.4",
     "openai": "^4.67.3",
+    "pg": "^8.13.0",
     "rimraf": "^6.0.1",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.10",
+    "@types/uuid": "^10.0.0"
   }
 }

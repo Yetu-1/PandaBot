@@ -3,7 +3,7 @@ import { FileObject } from "openai/resources/files.mjs";
 
 export interface ThreadObj {
   thread: Thread;
-  messageFiles: FileObject[];
+  quizFiles: FileObject[];
 }
 
 export interface QuizQuestion {
