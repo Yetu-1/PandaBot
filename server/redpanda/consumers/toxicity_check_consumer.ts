@@ -1,12 +1,12 @@
-import { redpanda } from "./redpanda_config.js";
-import { discord_client } from "../index.js";
-import { checkMsgSafety } from "../services/checkMessageSafety.js";
+import { redpanda } from "../redpanda_config.js";
+import { discord_client } from "../../index.js";
+import { checkMsgSafety } from "../../services/checkMessageSafety.js";
 import env from "dotenv"
 import { TextChannel } from "discord.js";
 
 env.config();
 
-const groupId = process.env.GROUP_ID || "default-groupy";
+const groupId = process.env.MESSAGE_GROUP_ID || "default-groupy";
 const topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
 
 const consumer = redpanda.consumer({ groupId });

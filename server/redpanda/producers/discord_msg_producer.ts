@@ -1,4 +1,4 @@
-import { redpanda } from "./redpanda_config.js";
+import { redpanda } from "../redpanda_config.js";
 import { Message } from "discord.js";
 import env from "dotenv"
 

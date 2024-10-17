@@ -1,15 +1,21 @@
 import env from "dotenv";
 import { Client, CommandInteractionOption, GatewayIntentBits } from "discord.js";
-import * as Producer from "./redpanda/producer.js";
-import * as Consumer from "./redpanda/consumer.js";
+import * as Admin from "./redpanda/admin.js";
+import * as MessageProducer from "./redpanda/producers/discord_msg_producer.js";
+import * as MessageConsumer from "./redpanda/consumers/toxicity_check_consumer.js";
+
+import * as QuizProducer from "./redpanda/producers/quiz_response_producer.js";
+import * as QuizConsumer from "./redpanda/consumers/quiz_response_consumer.js";
+
 import { generateQuiz } from "./services/generateQuiz.js";
 import { registerCommands } from "./services/registerCommands.js";
 import { saveQuiz } from "./services/dataAccess/quizRepository.js";
 
+
 env.config();
 
 export const discord_client = new Client({
-  intents: [
+  intents: [ 
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildMembers,
@@ -35,19 +41,22 @@ async function sendMessage(content: string, channelId: string) {
 }
 
 async function setupServer() {
-  // try {
-  //   // Create topic
-  //   const topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
-  //   await Admin.createTopic(topic);
-  //   // Connect producer to repanda broker
-  //   await Producer.connect();
-  //   // Initialize consumner to repanda broker and subscribe to specified topic to consume messages
-  //   await Consumer.init();
-  //   // Login discord bot
+  try {
+    // Create topic
+    const msg_topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
+    const quiz_topic = process.env.QUIZ_RESPONSE_TOPIC || "default-topic";
+    await Admin.createTopic([msg_topic, quiz_topic]);
+    // Connect producers to repanda broker
+    await MessageProducer.connect();
+    await QuizProducer.connect();
+    // Initialize consumners to repanda broker and subscribe to specified topic to consume messages
+    await MessageConsumer.init();
+    await QuizConsumer.init();
+    // Login discord bot
   discord_client.login(process.env.DISCORD_TOKEN);
-  // } catch (error) {
-  //   console.error("Error:", error);ff
-  // }
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
  
 setupServer();
@@ -140,8 +149,10 @@ process.on("SIGINT", async () => {
   console.log("Closing app...");
   try {
     // Disconnect producer and consumer from repanda broker
-    await Producer.disconnect();
-    await Consumer.disconnect();
+    await MessageProducer.disconnect();
+    await MessageConsumer.disconnect();
+    await QuizProducer.disconnect();
+    await QuizConsumer.disconnect();
   } catch (err) {
     console.error("Error during cleanup:", err);
     process.exit(1);
