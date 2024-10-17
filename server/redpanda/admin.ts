@@ -1,20 +1,21 @@
 import { redpanda } from "./redpanda_config.js";
 
 const admin = redpanda.admin();
-export async function createTopic( topic: string, partitions?: number, replicas?: number ) {
+export async function createTopic( topics: string[], partitions?: number, replicas?: number ) {
   await admin.connect();
   const existingTopics = await admin.listTopics();
-  if (!existingTopics.includes(topic)) {
-    await admin.createTopics({
-      topics: [
-        {
-          topic: topic,
-          numPartitions: partitions ? partitions : 1,
-          replicationFactor: replicas ? replicas : 1,
-        },
-      ],
-    });
-  }
+  let newTopics = topics.filter((topic) => (!existingTopics.includes(topic)))
+
+  await admin.createTopics({
+    topics: newTopics.map((topic) => (
+      {
+        topic: topic,
+        numPartitions: partitions ? partitions : 1,
+        replicationFactor: replicas ? replicas : 1,
+      }
+    ))
+  });
+  console.log(topics);
   await admin.disconnect();
 }
 
