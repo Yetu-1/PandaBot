@@ -145,12 +145,13 @@ discord_client.on("messageCreate", async (message) => {
 });
 
 discord_client.on("interactionCreate", async (interaction) => {
-  if(!interaction.isButton) return;
-  const buttonInteraction = interaction as ButtonInteraction;
-  const params = buttonInteraction.customId.split(':');
-  // filter by quiz button. structure of quiz button = 'qz:quizid:qn:opt'
-  if(params[0] != 'qz') return;
-  console.log(params)
+  if(!interaction.isButton) {
+    const buttonInteraction = interaction as ButtonInteraction;
+    const params = buttonInteraction.customId.split(':');
+    // filter by quiz button. structure of quiz button = 'qz:quizid:qn:opt'
+    if(params[0] != 'qz') return;
+    console.log(params)
+  }
   // check if interaction is not a slash command
   if (!interaction.isChatInputCommand()) return;
 
