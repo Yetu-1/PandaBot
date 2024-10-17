@@ -6,7 +6,7 @@ type Score = {
     value: number;
 }
 
-export async function storeScore(score: Score) {
+export async function storeScore(score: Score) : Promise<boolean>{
     try{
         await db.query("INSERT INTO score (user_id, quiz_id, score) VALUES ($1, $2, $3)", 
             [score.user_id, score.quiz_id, score.value] );
