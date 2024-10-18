@@ -22,8 +22,8 @@ export async function init() {
         const messageObject = JSON.parse(message.value?.toString() || "{}");
         console.log("consumer received quiz object");
         console.log(messageObject);
+        //TODO: save quiz into database
         await saveQuiz(messageObject.quiz);
-        //TODO: save user response into database
         //TODO: send next question to user
       },
     });
@@ -39,3 +39,4 @@ export async function disconnect() {
     console.error("Error:", error);
   }
 }
+
