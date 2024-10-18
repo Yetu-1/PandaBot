@@ -7,9 +7,11 @@ export interface ThreadObj {
 }
 
 export interface QuizQuestion {
+  quiz_id: string;
   question: string;
   answer: string;
   options: string[];
+  number: string;
 }
 
 export interface Quiz {

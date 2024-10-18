@@ -19,12 +19,12 @@ function getEmojiFromNumber(number: number): string {
     case 5:
       return "5️⃣";
 
-    default:
+    default: 
       return "";
   }
 }
 
-export function createQuizMessage(question: QuizQuestion, number: number, quizId: string): {
+export function createQuizMessage(question: QuizQuestion): {
   embeds: any;
   components: any;
 } {
@@ -44,7 +44,7 @@ export function createQuizMessage(question: QuizQuestion, number: number, quizId
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     question.options.map((_, index) =>
       new ButtonBuilder()
-        .setCustomId(`qz:${quizId}:${number}:${index + 1}`)
+        .setCustomId(`qz:${question.quiz_id}:${question.number}:${index + 1}`)
         .setLabel(`${index + 1}`)
         .setStyle(ButtonStyle.Primary)
     )
