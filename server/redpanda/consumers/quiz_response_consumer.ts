@@ -1,5 +1,5 @@
 import { redpanda } from "../redpanda_config.js";
-import { discord_client } from "../../index.js";
+import { discord_client } from "../../services/config.js";
 import env from "dotenv"
 
 env.config();
