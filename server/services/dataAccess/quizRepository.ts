@@ -16,13 +16,13 @@ export const db = new pg.Client({
 
 db.connect();
 
-export async function saveQuiz(quiz: Quiz) : Promise<string> {
+export async function saveQuiz(quiz: Quiz, channel_id: string) : Promise<string> {
     const quiz_id = uuidv4();
     try {
         const new_quiz: QuizEntry = {
             id: quiz_id,
             title: quiz.title, 
-            channel_id: quiz.channelId, 
+            channel_id: channel_id,
         }
         // save quiz into database
         let resp = await createQuizEntry(new_quiz);

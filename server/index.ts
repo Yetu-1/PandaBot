@@ -7,14 +7,14 @@ import { ButtonInteraction } from "discord.js";
 import { getJSDocReturnType } from "typescript";
 import { Client, CommandInteractionOption, GatewayIntentBits } from "discord.js";
 import * as Admin from "./redpanda/admin.js";
-import * as MessageProducer from "./redpanda/producers/discord_msg_producer.js";
-import * as MessageConsumer from "./redpanda/consumers/toxicity_check_consumer.js";
+import * as MessageProducer from "./redpanda/producers/DiscordMsgProducer.js";
+import * as MessageConsumer from "./redpanda/consumers/ToxicityCheckConsumer.js";
 
 import * as QuizProducer from "./redpanda/producers/quiz_response_producer.js";
-import * as QuizConsumer from "./redpanda/consumers/quiz_response_consumer.js";
+import * as QuizConsumer from "./redpanda/consumers/QuizResponseConsumer.js";
 
-import * as QuizDBProducer from "./redpanda/producers/save_quiz_producer.js";
-import * as QuizDBConsumer from "./redpanda/consumers/save_quiz_consumer.js";
+import * as QuizDBProducer from "./redpanda/producers/QuizRequestProducer.js";
+import * as QuizDBConsumer from "./redpanda/consumers/QuizGenerationConsumer.js";
 
 import { registerCommands } from "./services/registerCommands.js";
 import { saveQuiz } from "./services/dataAccess/quizRepository.js";
@@ -176,55 +176,8 @@ discord_client.on("interactionCreate", async (interaction) => {
       files.push(file1);
       if(file2 && file2.attachment) // if the second file exists
         files.push(file2);
-      // const quiz = await generateQuiz(files);
-      const quiz: any = {
-        status: 'success',
-        title: 'Color Theory Quiz',
-        questions: [
-          {
-            question: 'Which of the following color pairs are considered complementary in the RGB color model?',
-            options: [ 'Red-Green', 'Green-Magenta', 'Blue-Orange', 'Yellow-Purple' ],
-            answer: '2'
-          },
-          {
-            question: 'According to the RYB color model, blue is complementary to which color?',
-            options: [ 'Orange', 'Yellow', 'Green', 'Red' ],
-            answer: '1'
-          },
-          {
-            question: 'What is produced when complementary colors are combined?',
-            options:  [
-              'A new color',
-              'A vibrant pattern',
-              'A grayscale color',
-              'A warm tone'
-            ],
-            answer: '3'
-          },
-          {
-            question: 'Which theory suggests that red-green and blue-yellow are the most contrasting pairs?',
-            options: [
-              'RGB Color Model',
-              'CMY Subtractive Model',
-              'Opponent Process Theory',
-              'RYB Color Model'
-            ],
-            answer: '3'
-          },
-          {
-            question: 'What is a common pair of complementary colors in all color theories?',
-            options: [ 'Red-Green', 'Blue-Yellow', 'Black-White', 'Purple-Orange' ],
-            answer: '3'
-          }
-        ]
-      }
-      
-      if(quiz.status == 'success') {
-        // store quiz in database
-        console.log("about to send quiz to consumer")
-        quiz.channelId = interaction.channelId;
-        await QuizDBProducer.sendQuiz(quiz as Quiz);
-      }
+      console.log("about to send message to consumer")
+      await QuizDBProducer.sendQuiz(files, interaction.channelId);
     }
   }
 });
