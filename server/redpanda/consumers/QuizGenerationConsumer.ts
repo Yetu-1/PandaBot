@@ -52,7 +52,7 @@ async function sendParticpateButton(quiz: Quiz, quiz_id: string, channel_id: str
   // Create button row for each answer
   const embed = new EmbedBuilder()
   .setColor(0x3498db)
-  .setTitle(`Join the ${quiz.title} Quiz now!`)
+  .setTitle(`Join the ${quiz.title} quiz now!`)
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()

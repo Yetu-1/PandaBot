@@ -2,7 +2,7 @@ import env from "dotenv";
 import { discord_client } from "./services/config.js";
 import { createQuizMessage } from "./services/createDiscordQuestion.js";
 import { generateQuiz } from "./services/generateQuiz.js";
-import { Quiz } from "./services/models.js";
+import { Quiz, QuizUserAnswer } from "./services/models.js";
 import { ButtonInteraction } from "discord.js";
 import { getJSDocReturnType } from "typescript";
 import { Client, CommandInteractionOption, GatewayIntentBits } from "discord.js";
@@ -63,16 +63,16 @@ async function setupServer() {
   try {
     // Create topic
     // const msg_topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
-    // const quiz_topic = process.env.QUIZ_RESPONSE_TOPIC || "default-topic";
+    const quiz_topic = process.env.QUIZ_RESPONSE_TOPIC || "default-topic";
     const quiz_db_topic = process.env.QUIZ_DB_TOPIC || "default-topic";
-    await Admin.createTopic([quiz_db_topic]);
+    await Admin.createTopic([quiz_topic, quiz_db_topic]);
     // Connect producers to repanda broker
     // await MessageProducer.connect();
-    // await QuizProducer.connect();
+    await QuizProducer.connect();
     await QuizDBProducer.connect();
     // Initialize consumners to repanda broker and subscribe to specified topic to consume messages
     // await MessageConsumer.init();
-    // await QuizConsumer.init();
+    await QuizConsumer.init();
     await QuizDBConsumer.init();
     // Login discord bot
   discord_client.login(process.env.DISCORD_TOKEN);
@@ -92,61 +92,59 @@ discord_client.on("messageCreate", async (message) => {
   try {
     // if (message.attachments.size > 0) {
     //   console.log("Message has attachments");
-      // const quizStr = await generateQuiz(message);
-      // const quiz: Quiz = JSON.parse(quizStr); //
-      // const quiz: Quiz = {
-      //   status: 'success',
-      //   title: 'Color Theory Quiz',
-      //   id: '3748474372782487',
-      //   questions: [
-      //     {
-      //       question: 'Which of the following color pairs are considered complementary in the RGB color model?',
-      //       options: [ 'Red-Green', 'Green-Magenta', 'Blue-Orange', 'Yellow-Purple' ],
-      //       answer: '2'
-      //     },
-      //     {
-      //       question: 'According to the RYB color model, blue is complementary to which color?',
-      //       options: [ 'Orange', 'Yellow', 'Green', 'Red' ],
-      //       answer: '1'
-      //     },
-      //     {
-      //       question: 'What is produced when complementary colors are combined?',
-      //       options:  [
-      //         'A new color',
-      //         'A vibrant pattern',
-      //         'A grayscale color',
-      //         'A warm tone'
-      //       ],
-      //       answer: '3'
-      //     },
-      //     {
-      //       question: 'Which theory suggests that red-green and blue-yellow are the most contrasting pairs?',
-      //       options: [
-      //         'RGB Color Model',
-      //         'CMY Subtractive Model',
-      //         'Opponent Process Theory',
-      //         'RYB Color Model'
-      //       ],
-      //       answer: '3'
-      //     },
-      //     {
-      //       question: 'What is a common pair of complementary colors in all color theories?',
-      //       options: [ 'Red-Green', 'Blue-Yellow', 'Black-White', 'Purple-Orange' ],
-      //       answer: '3'
-      //     }
-      //   ]
-      // }
-      // const discordQuestions: {
-      //   embeds: any;
-      //   components: any;
-      // }[] = quiz.questions.map((q, index) => createQuizMessage(q, index+1, quiz.id));
+    //   const quiz: Quiz = {
+    //     status: 'success',
+    //     title: 'Color Theory Quiz',
+    //     id: 'e818fe5d-27a6-48f0-ae74-3224f16e9ac3',
+    //     channelId: message.channelId,
+    //     questions: [
+    //       {
+    //         question: 'Which of the following color pairs are considered complementary in the RGB color model?',
+    //         options: [ 'Red-Green', 'Green-Magenta', 'Blue-Orange', 'Yellow-Purple' ],
+    //         answer: '2'
+    //       },
+    //       {
+    //         question: 'According to the RYB color model, blue is complementary to which color?',
+    //         options: [ 'Orange', 'Yellow', 'Green', 'Red' ],
+    //         answer: '1'
+    //       },
+    //       {
+    //         question: 'What is produced when complementary colors are combined?',
+    //         options:  [
+    //           'A new color',
+    //           'A vibrant pattern',
+    //           'A grayscale color',
+    //           'A warm tone'
+    //         ],
+    //         answer: '3'
+    //       },
+    //       {
+    //         question: 'Which theory suggests that red-green and blue-yellow are the most contrasting pairs?',
+    //         options: [
+    //           'RGB Color Model',
+    //           'CMY Subtractive Model',
+    //           'Opponent Process Theory',
+    //           'RYB Color Model'
+    //         ],
+    //         answer: '3'
+    //       },
+    //       {
+    //         question: 'What is a common pair of complementary colors in all color theories?',
+    //         options: [ 'Red-Green', 'Blue-Yellow', 'Black-White', 'Purple-Orange' ],
+    //         answer: '3'
+    //       }
+    //     ]
+    //   }
+    //   const discordQuestions: {
+    //     embeds: any;
+    //     components: any;
+    //   }[] = quiz.questions.map((q, index) => createQuizMessage(q, index+1, quiz.id));
 
-      // discordQuestions.forEach((q) => {
-      //   sendDiscordQuiz(q, message.channel.id);
-      // });
-      // console.log(quiz);
+    //   discordQuestions.forEach((q) => {
+    //     sendDiscordQuiz(q, message.channel.id);
+    //   });
+    //   console.log(quiz);
     // }
-    // await Producer.sendMessage(message);
   } catch (error) {
     console.error("Error:", error);
   }
@@ -154,11 +152,7 @@ discord_client.on("messageCreate", async (message) => {
 
 discord_client.on("interactionCreate", async (interaction) => {
   if(interaction.isButton()) {
-    const buttonInteraction = interaction as ButtonInteraction;
-    const params = buttonInteraction.customId.split(':');
-    // filter by quiz button. structure of quiz button = 'qz:quizid:qn:opt'
-    if(params[0] != 'qz') return;
-    console.log(params)
+    sendUserResponse(interaction);
   }
   // check if interaction is not a slash command
   if (interaction.isChatInputCommand()) {
@@ -181,6 +175,38 @@ discord_client.on("interactionCreate", async (interaction) => {
     }
   }
 });
+
+async function sendUserResponse(interaction:  ButtonInteraction) {
+  const params = interaction.customId.split(':');
+  // filter by quiz button. structure of quiz button = 'qz:quizid:qn:ans' or 'qz:quizid:participate for participate button
+  if(params[0] != 'qz' && params.length <= 0) return;
+  
+  if(params[2] == 'participate') {
+    interaction.reply(
+      { 
+        content: "Check your dm for the start quiz button",
+        ephemeral: true
+      }
+    );
+    const user_response : QuizUserAnswer = {
+      user_id: interaction.user.id,
+      quiz_id: params[1],
+      question_number: '',
+      answer: '',
+      type: 'participate'
+    }
+    await QuizProducer.sendUserResponse(user_response);
+  }else {
+   const user_response : QuizUserAnswer = {
+      user_id: interaction.user.id,
+      quiz_id: params[1],
+      question_number: params[2],
+      answer: params[3],
+      type: 'answer'
+    }
+    await QuizProducer.sendUserResponse(user_response);
+  }
+}
 
 process.on("SIGINT", async () => {
   console.log("Closing app...");

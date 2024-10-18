@@ -1,5 +1,6 @@
 import { redpanda } from "../redpanda_config.js";
 import { discord_client } from "../../services/config.js";
+import { storeUserAnswer } from "../../services/dataAccess/userAnswerRepository.js";
 import env from "dotenv"
 
 env.config();
@@ -18,10 +19,16 @@ export async function init() {
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         const messageObject = JSON.parse(message.value?.toString() || "{}");
-        const messageContent = messageObject.message.content;
+        const response = messageObject.answer;
+        console.log(response);
+        if(response.type === 'answer') {
+          // Save user response into database
+          await storeUserAnswer(response);
+          console.log("user answer stored!")
+        }else if (response.type == 'participate') {
 
-        //TODO: save user response into database
-        //TODO: send next question to user
+        }
+        // Send next question to user
       },
     });
   } catch (error) {

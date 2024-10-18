@@ -25,3 +25,11 @@ export interface QuizEntry {
   title: string
   channel_id: string
 }
+
+export interface QuizUserAnswer {
+  user_id: string;
+  quiz_id: string;
+  question_number: string;
+  answer: string;
+  type: string;
+}
