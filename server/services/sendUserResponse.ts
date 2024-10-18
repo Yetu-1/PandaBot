@@ -1,8 +1,9 @@
-import { ButtonInteraction } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle } from "discord.js";
 import { QuizUserAnswer } from "./models.js";
 
 import * as QuizProducer from "../redpanda/producers/QuizResponseProducer.js";
 import * as QuizConsumer from "../redpanda/consumers/QuizResponseConsumer.js";
+import { discord_client } from "./config.js";
 
 export async function sendUserResponse(interaction:  ButtonInteraction) {
     const params = interaction.customId.split(':');
@@ -10,7 +11,7 @@ export async function sendUserResponse(interaction:  ButtonInteraction) {
     if(params[0] != 'qz' && params.length <= 0) return;
     
     if(params[2] == 'participate') {
-      interaction.reply(
+      await interaction.reply(
         { 
           content: "Check your dm for the start quiz button",
           ephemeral: true
@@ -25,6 +26,10 @@ export async function sendUserResponse(interaction:  ButtonInteraction) {
       }
       await QuizProducer.sendUserResponse(user_response);
     }else {
+      // Delete message
+      const message = await interaction.channel?.messages.fetch(interaction.message.id);
+      message?.delete();
+
      const user_response : QuizUserAnswer = {
         user_id: interaction.user.id,
         quiz_id: params[1],
