@@ -15,7 +15,6 @@ export async function createTopic( topics: string[], partitions?: number, replic
       }
     ))
   });
-  console.log(topics);
   await admin.disconnect();
 }
 

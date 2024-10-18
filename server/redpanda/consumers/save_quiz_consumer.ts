@@ -3,6 +3,7 @@ import { discord_client } from "../../services/config.js";
 import env from "dotenv"
 import { saveQuiz } from "../../services/dataAccess/quizRepository.js";
 import { Quiz } from "../../services/models.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 
 env.config();
 
@@ -21,12 +22,41 @@ export async function init() {
       eachMessage: async ({ topic, partition, message }) => {
         const messageObject = JSON.parse(message.value?.toString() || "{}");
         console.log("consumer received quiz object");
-        console.log(messageObject);
-        //TODO: save quiz into database
-        await saveQuiz(messageObject.quiz);
-        //TODO: send next question to user
+        const quiz = messageObject.quiz;
+        // save quiz into database
+        const quiz_id = await saveQuiz(quiz);
+        // send participate button to discord channel
+        await sendParticpateButton(quiz, quiz_id);
       },
     });
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+async function sendParticpateButton(quiz: Quiz, quiz_id: string) {  
+  // Create button row for each answer
+  const embed = new EmbedBuilder()
+  .setColor(0x3498db)
+  .setTitle(`Join the ${quiz.title} now!`)
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+    .setCustomId(`qz:${quiz_id}:participate`)
+    .setLabel('Participate')
+    .setStyle(ButtonStyle.Primary)
+  );
+
+  const message = {
+    embeds: [embed],
+    components: [row]
+  };
+
+  try {
+    const channel = await discord_client.channels.fetch(quiz.channelId);
+    if (channel && channel.isSendable()) {
+      await channel.send(message);
+    }
   } catch (error) {
     console.error("Error:", error);
   }

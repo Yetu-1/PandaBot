@@ -16,30 +16,29 @@ export const db = new pg.Client({
 
 db.connect();
 
-export async function saveQuiz(quiz: Quiz) : Promise<boolean> {
+export async function saveQuiz(quiz: Quiz) : Promise<string> {
+    const quiz_id = uuidv4();
     try {
-        const quiz_id = uuidv4();
         const new_quiz: QuizEntry = {
             id: quiz_id,
-            title: quiz.title,
-            channel_id: quiz.channelId,
+            title: quiz.title, 
+            channel_id: quiz.channelId, 
         }
         // save quiz into database
         let resp = await createQuizEntry(new_quiz);
         if(resp) {
             // save each question entry into the database
             resp = await storeQuestions(quiz.questions, quiz_id);
-            return resp;
+            return quiz_id;
         }
-        return resp;
+        return '';
     }catch (err) {
         console.error("Error saving quiz", err);
-        return false;
+        return '';
     }
 }
 
 async function createQuizEntry(quiz: QuizEntry): Promise<boolean>{
-    console.log(quiz)
     try {
         await db.query("INSERT INTO quiz (quiz_id, quiz_title, channel_id) VALUES ($1, $2, $3)", [quiz.id, quiz.title, quiz.channel_id])
         return true;
