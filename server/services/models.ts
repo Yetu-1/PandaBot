@@ -15,5 +15,13 @@ export interface QuizQuestion {
 export interface Quiz {
   status: "success" | "failure";
   id: string;
+  title: string;
+  channelId: string;
   questions: QuizQuestion[];
+}
+
+export interface QuizEntry {
+  id: string
+  title: string
+  channel_id: string
 }
