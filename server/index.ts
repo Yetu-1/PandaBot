@@ -10,7 +10,7 @@ import * as Admin from "./redpanda/admin.js";
 import * as MessageProducer from "./redpanda/producers/DiscordMsgProducer.js";
 import * as MessageConsumer from "./redpanda/consumers/ToxicityCheckConsumer.js";
 
-import * as QuizProducer from "./redpanda/producers/quiz_response_producer.js";
+import * as QuizProducer from "./redpanda/producers/QuizResponseProducer.js";
 import * as QuizConsumer from "./redpanda/consumers/QuizResponseConsumer.js";
 
 import * as QuizDBProducer from "./redpanda/producers/QuizRequestProducer.js";
@@ -161,23 +161,23 @@ discord_client.on("interactionCreate", async (interaction) => {
     console.log(params)
   }
   // check if interaction is not a slash command
-  if (!interaction.isChatInputCommand()) return;
-
-  if(interaction.commandName == 'start-quiz') {
-    // Get all options
-    const file1 = interaction.options.get('file1');
-    const file2 = interaction.options.get('file2');
-    const duration = interaction.options.get('duration') || { name: 'duration', type: 10, value: 0 }
-
-    interaction.reply(`The quiz is about to start. Duration: ${duration.value}!`);
-
-    if(file1 && file1.attachment) {
-      const files: CommandInteractionOption[] = [];
-      files.push(file1);
-      if(file2 && file2.attachment) // if the second file exists
-        files.push(file2);
-      console.log("about to send message to consumer")
-      await QuizDBProducer.sendQuiz(files, interaction.channelId);
+  if (interaction.isChatInputCommand()) {
+    if(interaction.commandName == 'start-quiz') {
+      // Get all options
+      const file1 = interaction.options.get('file1');
+      const file2 = interaction.options.get('file2');
+      const duration = interaction.options.get('duration') || { name: 'duration', type: 10, value: 0 }
+  
+      interaction.reply(`The quiz is about to start. Duration: ${duration.value}!`);
+  
+      if(file1 && file1.attachment) {
+        const files: CommandInteractionOption[] = [];
+        files.push(file1);
+        if(file2 && file2.attachment) // if the second file exists
+          files.push(file2);
+        // send quiz to quiz generation consumer to generate, store and start quiz
+        await QuizDBProducer.sendQuiz(files, interaction.channelId);
+      }
     }
   }
 });

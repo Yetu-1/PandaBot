@@ -85,7 +85,7 @@ async function createThread(files: CommandInteractionOption[]): Promise<ThreadOb
                 answer options from attached documents and returns an array of questions in this format: 
                 {
                 status: "success",
-                title: "",
+                title: "", (don't add the word "quiz" to this title)
                 questions: [
                   {
                     question: "what is the color of an orange",
