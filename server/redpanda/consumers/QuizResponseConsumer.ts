@@ -2,9 +2,10 @@ import { redpanda } from "../redpanda_config.js";
 import { discord_client } from "../../services/config.js";
 import { storeUserAnswer } from "../../services/dataAccess/userAnswerRepository.js";
 import env from "dotenv"
-import { QuizQuestion, QuizUserAnswer } from "../../services/models.js";
+import { Quiz, QuizQuestion, QuizUserAnswer } from "../../services/models.js";
 import { getQuestion } from "../../services/dataAccess/questionRepository.js";
 import { createQuizMessage } from "../../services/createDiscordQuestion.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 env.config();
 
 const groupId = process.env.QUIZ_GROUP_ID || "default-groupy";
@@ -31,7 +32,9 @@ export async function init() {
           await sendNextQuestion(response);
 
         }else if (response.type == 'participate') {
-
+          await sendStartQuizPrompt(response);
+        }else if(response.type == 'start') {
+          await sendNextQuestion(response);
         }
         // Send next question to user
       },
@@ -70,6 +73,32 @@ async function sendQuestion(question : any, userId: string) {
     console.error("Error:", error);
   }
 } 
+
+async function sendStartQuizPrompt(quiz: QuizUserAnswer) {  
+  // Create button row for each answer
+  const embed = new EmbedBuilder()
+  .setColor(0x3498db)
+  .setTitle(`Start the quiz now!`)
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+    .setCustomId(`qz:${quiz.quiz_id}:start`)
+    .setLabel('Start')
+    .setStyle(ButtonStyle.Primary)
+  );
+
+  const message = {
+    embeds: [embed],
+    components: [row]
+  };
+
+  try {
+    const user = await discord_client.users.fetch(quiz.user_id);
+    await user.send(message);
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
 
 export async function disconnect() {
   try {

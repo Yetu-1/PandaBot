@@ -10,19 +10,25 @@ export async function sendUserResponse(interaction:  ButtonInteraction) {
     // filter by quiz button. structure of quiz button = 'qz:quizid:qn:ans' or 'qz:quizid:participate for participate button
     if(params[0] != 'qz' && params.length <= 0) return;
     
-    if(params[2] == 'participate') {
-      await interaction.reply(
-        { 
-          content: "Check your dm for the start quiz button",
-          ephemeral: true
-        }
-      );
+    if(params[2] == 'participate' || params[2] == 'start') {
+      if(params[2] == 'participate') {
+        await interaction.reply(
+          { 
+            content: "Check your dm for the start quiz button",
+            ephemeral: true
+          }
+        );
+      }else {
+        // delete start quiz button 
+        const message = await interaction.channel?.messages.fetch(interaction.message.id);
+        message?.delete();
+      }
       const user_response : QuizUserAnswer = {
         user_id: interaction.user.id,
         quiz_id: params[1],
-        question_number: '',
+        question_number: '0',
         answer: '',
-        type: 'participate'
+        type: params[2]
       }
       await QuizProducer.sendUserResponse(user_response);
     }else {
