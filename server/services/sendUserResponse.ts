@@ -25,6 +25,7 @@ export async function sendUserResponse(interaction:  ButtonInteraction) {
       }
       const user_response : QuizUserAnswer = {
         user_id: interaction.user.id,
+        username: interaction?.user.globalName || '',
         quiz_id: params[1],
         question_number: '0',
         answer: '',
@@ -38,6 +39,7 @@ export async function sendUserResponse(interaction:  ButtonInteraction) {
 
      const user_response : QuizUserAnswer = {
         user_id: interaction.user.id,
+        username: interaction.user.globalName || '',
         quiz_id: params[1],
         question_number: params[2],
         answer: params[3],

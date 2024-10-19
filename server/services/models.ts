@@ -30,8 +30,16 @@ export interface QuizEntry {
 
 export interface QuizUserAnswer {
   user_id: string;
+  username: string;
   quiz_id: string;
   question_number: string;
   answer: string;
   type: string;
+}
+
+export interface Score {
+    user_id: string;
+    username: string;
+    quiz_id: string;
+    value: number;
 }

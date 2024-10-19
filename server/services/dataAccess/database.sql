@@ -20,6 +20,7 @@ CREATE TABLE question (
 CREATE TABLE user_answer (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(20),
+    username VARCHAR(50),
     quiz_id uuid REFERENCES quiz(quiz_id) ON DELETE CASCADE,
     question_number INTEGER,
     answer INTEGER,
@@ -30,6 +31,7 @@ CREATE TABLE user_answer (
 CREATE TABLE score (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(20),
+    username VARCHAR(50),
     quiz_id uuid REFERENCES quiz(quiz_id) ON DELETE CASCADE,
     score INTEGER
 );
