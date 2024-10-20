@@ -15,7 +15,6 @@ export async function storeQuestions(quizQuestions: QuizQuestion[], quiz_id: str
 }
 
 export async function getQuestion(quiz_id: string, number: number) : Promise<any> {
-    console.log(quiz_id, " ", number);
     try {
         // Fetch question from db using the quiz id and question number
         const resp = await db.query("SELECT * FROM question WHERE quiz_id=$1 AND number=$2", [quiz_id, number]);
@@ -23,6 +22,21 @@ export async function getQuestion(quiz_id: string, number: number) : Promise<any
             return resp.rows[0];
         }else {
             return "End";
+        }
+    }catch (err) {
+        console.error("Error fetching quiz questions", err);
+        return "Error";
+    }
+}
+
+export async function getAnswers(quiz_id: string) : Promise<any> {
+    try {
+        // Fetch question numbers and corresponding answers from db using the quiz id 
+        const resp = await db.query("SELECT number, answer FROM question WHERE quiz_id=$1", [quiz_id]);
+        if(resp.rows.length > 0) {
+            return resp.rows;
+        }else {
+            return "NONE";
         }
     }catch (err) {
         console.error("Error fetching quiz questions", err);

@@ -19,7 +19,7 @@ function getEmojiFromNumber(number: number): string {
     case 5:
       return "5️⃣";
 
-    default: 
+    default:
       return "";
   }
 }

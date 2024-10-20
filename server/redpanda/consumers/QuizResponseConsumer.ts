@@ -36,7 +36,6 @@ export async function init() {
         }else if(response.type == 'start') {
           await sendNextQuestion(response);
         }
-        // Send next question to user
       },
     });
   } catch (error) {

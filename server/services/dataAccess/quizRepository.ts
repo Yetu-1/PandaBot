@@ -47,3 +47,17 @@ async function createQuizEntry(quiz: QuizEntry): Promise<boolean>{
         return false;
     }
 }
+
+export async function getQuiz(quiz_id: string) {
+    try {
+        const resp = await db.query("SELECT * FROM quiz WHERE quiz_id=$1", [quiz_id])
+        if(resp.rows.length > 0) {
+            return resp.rows[0];
+        }else {
+            return "NONE";
+        }
+    }catch (err) {
+        console.error("Error storing quiz", err);
+        return "Error";
+    }
+}

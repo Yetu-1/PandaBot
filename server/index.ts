@@ -19,6 +19,7 @@ import * as QuizDBConsumer from "./redpanda/consumers/QuizGenerationConsumer.js"
 import { registerCommands } from "./services/registerCommands.js";
 import { saveQuiz } from "./services/dataAccess/quizRepository.js";
 import { sendUserResponse } from "./services/sendUserResponse.js";
+import { calculateScores } from "./services/dataAccess/scoreRepository.js";
 
 env.config();
 
@@ -62,21 +63,22 @@ async function sendDiscordQuiz(
 
 async function setupServer() {
   try {
-    // Create topic
-    // const msg_topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
-    const quiz_topic = process.env.QUIZ_RESPONSE_TOPIC || "default-topic";
-    const quiz_db_topic = process.env.QUIZ_DB_TOPIC || "default-topic";
-    await Admin.createTopic([quiz_topic, quiz_db_topic]);
-    // Connect producers to repanda broker
-    // await MessageProducer.connect();
-    await QuizProducer.connect();
-    await QuizDBProducer.connect();
-    // Initialize consumners to repanda broker and subscribe to specified topic to consume messages
-    // await MessageConsumer.init();
-    await QuizConsumer.init();
-    await QuizDBConsumer.init();
+    // // Create topic
+    // // const msg_topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
+    // const quiz_topic = process.env.QUIZ_RESPONSE_TOPIC || "default-topic";
+    // const quiz_db_topic = process.env.QUIZ_DB_TOPIC || "default-topic";
+    // await Admin.createTopic([quiz_topic, quiz_db_topic]);
+    // // Connect producers to repanda broker
+    // // await MessageProducer.connect();
+    // await QuizProducer.connect();
+    // await QuizDBProducer.connect();
+    // // Initialize consumners to repanda broker and subscribe to specified topic to consume messages
+    // // await MessageConsumer.init();
+    // await QuizConsumer.init();
+    // await QuizDBConsumer.init();
     // Login discord bot
-  discord_client.login(process.env.DISCORD_TOKEN);
+  // discord_client.login(process.env.DISCORD_TOKEN);
+    await calculateScores('07dba886-b432-49c5-9695-df2655f3b961');
   } catch (error) {
     console.error("Error:", error);
   }
