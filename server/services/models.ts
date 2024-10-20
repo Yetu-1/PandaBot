@@ -43,3 +43,8 @@ export interface Score {
     quiz_id: string;
     value: number;
 }
+
+export interface Answer {
+  number: string;
+  answer: string;
+}
