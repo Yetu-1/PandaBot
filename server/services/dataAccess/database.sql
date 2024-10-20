@@ -33,7 +33,8 @@ CREATE TABLE score (
     user_id VARCHAR(20),
     username VARCHAR(50),
     quiz_id uuid REFERENCES quiz(quiz_id) ON DELETE CASCADE,
-    score INTEGER
+    score INTEGER,
+    CONSTRAINT unique_user_answer UNIQUE (user_id, quiz_id)
 );
 
  -- change question_number column name to number
