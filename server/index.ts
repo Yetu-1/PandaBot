@@ -17,6 +17,7 @@ import * as EndQuizConsumer from "./redpanda/consumers/EndQuizConsumer.js";
 
 import { registerCommands } from "./services/registerCommands.js";
 import { sendUserResponse } from "./services/sendUserResponse.js";
+import { endQuiz } from "./redpanda/consumers/EndQuizConsumer.js";
 
 env.config();
 

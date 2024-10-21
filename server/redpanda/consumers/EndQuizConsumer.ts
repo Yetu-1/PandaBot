@@ -31,17 +31,20 @@ export async function init() {
   }
 }
 
-async function endQuiz(quiz_id : string ) {
+export async function endQuiz(quiz_id : string ) {
     try {
         // calculate scores of each user and save scores in the database
         const resp = await calculateScores(quiz_id);
         if(resp) {
+            console.log("sending embed!")
             // Get Quiz
             const quiz = await getQuiz(quiz_id);
+            console.log(quiz);
             // set quiz status from "active" to "done" in database
             await setQuizStatus(quiz_id, QuizStatus.Done);
             // send end of quiz message and score board
-            const scores = await  getScores(quiz_id);
+            const scores = await getScores(quiz_id);
+            console.log(scores);
             if(scores != "Error") {
                 await sendLeaderboard(quiz.quiz_title, scores, quiz.channel_id);
             }
@@ -52,23 +55,25 @@ async function endQuiz(quiz_id : string ) {
 }
 
 async function sendLeaderboard(quiz_title: string, scores : any[], channel_id: string) {  
-    // Create button row for each answer
-    const embed = new EmbedBuilder()
-    .setColor(0x3498db)
-    .setTitle('Scores')
-    .setDescription(`${quiz_title} Quiz`)
-    .addFields(
-        {
-            name: "Leaderboard",
-            value: scores.map(user => `${user.username.padEnd(15, ' ')} | ${user.score}`).join('\n'), // Align names and scores
-            inline: false // Keep as false to ensure proper layout
-        }
-    )
-  
-    const scoreBoard = {
-      embeds: [embed]
-    };
+    const padding = 4;
+    const maxLength = Math.max(...scores.map(user => user.username.length)) + padding; // needed to properly format the table
+    const fieldtitle = "Name".padEnd(maxLength, ' ') + '  |  ' + "Score"
     try {
+        // Create button row for each answer
+        const embed = new EmbedBuilder()
+        .setColor(0x3498db)
+        .setTitle("Time's Up! Check Your Score")
+        .setDescription(`${quiz_title} Quiz`)
+        .addFields(
+            {
+                name: 'Score board',
+                value: `\`\`\`\n${fieldtitle}\n${scores.map(user => `${user.username.padEnd(maxLength, ' ')}  |  ${user.score}`).join('\n')}\n\`\`\``,
+            }
+        )
+    
+        const scoreBoard = {
+        embeds: [embed]
+        };
         const channel = await discord_client.channels.fetch(channel_id);
         if (channel && channel.isSendable()) {
           await channel.send(scoreBoard)

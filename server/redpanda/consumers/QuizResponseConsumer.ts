@@ -2,7 +2,7 @@ import { redpanda } from "../redpanda_config.js";
 import { discord_client } from "../../services/config.js";
 import { storeUserAnswer } from "../../services/dataAccess/userAnswerRepository.js";
 import env from "dotenv"
-import { Quiz, QuizQuestion, QuizUserAnswer } from "../../services/models.js";
+import { QuizQuestion, QuizUserAnswer } from "../../services/models.js";
 import { getQuestion } from "../../services/dataAccess/questionRepository.js";
 import { createQuizMessage } from "../../services/createDiscordQuestion.js";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
