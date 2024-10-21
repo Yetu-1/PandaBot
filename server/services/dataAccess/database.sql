@@ -37,6 +37,6 @@ CREATE TABLE score (
     CONSTRAINT unique_score_entry UNIQUE (user_id, quiz_id)
 );
 
- -- change question_number column name to number
-ALTER TABLE user_answer
-RENAME COLUMN question_number to number;
+--  -- change question_number column name to number
+-- ALTER TABLE user_answer
+-- RENAME COLUMN question_number to number;

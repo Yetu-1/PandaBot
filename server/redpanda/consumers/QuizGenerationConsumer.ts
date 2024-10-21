@@ -1,11 +1,12 @@
 import { redpanda } from "../redpanda_config.js";
 import { discord_client } from "../../services/config.js";
 import env from "dotenv"
-import { saveQuiz } from "../../services/dataAccess/quizRepository.js";
+import { saveQuiz, setQuizStatus } from "../../services/dataAccess/quizRepository.js";
 import { Quiz } from "../../services/models.js";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { generateQuiz } from "../../services/generateQuiz.js";
 import * as EndQuizProducer from "../producers/EndQuizProducer.js";
+import { QuizStatus } from "../../services/models.js";
 
 env.config();
 
@@ -39,6 +40,8 @@ export async function init() {
           setTimeout(async () => {
             await endQuiz(quiz_id);  // Call the function after the delay
           }, delay );
+          await setQuizStatus(quiz_id, QuizStatus.Active);
+
         }else {
           try {
             const channel = await discord_client.channels.fetch(messageObject.channelId);

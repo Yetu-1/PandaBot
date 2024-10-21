@@ -48,3 +48,8 @@ export interface Answer {
   number: string;
   answer: string;
 }
+
+export enum QuizStatus {
+  Active = 'active',
+  Done = 'done'
+}

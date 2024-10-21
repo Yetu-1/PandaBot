@@ -1,5 +1,7 @@
 import { redpanda } from "../redpanda_config.js";
-import { storeUserAnswer } from "../../services/dataAccess/userAnswerRepository.js";
+import { calculateScores } from "../../services/dataAccess/scoreRepository.js";
+import { QuizStatus } from "../../services/models.js";
+import { setQuizStatus } from "../../services/dataAccess/quizRepository.js";
 import env from "dotenv"
 env.config();
 
@@ -17,13 +19,26 @@ export async function init() {
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         const messageObject = JSON.parse(message.value?.toString() || "{}");
-        const response = messageObject.quiz_id;
-        console.log("i am here at the end quiz consumer!")
-        console.log(response);
+        const quiz_id = messageObject.quiz_id;
+        console.log(quiz_id);
 
       }
     });
   } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+async function endQuiz(quiz_id : string ) {
+    try {
+        // calculate scores of each user and saved scores in the database
+        const resp = await calculateScores(quiz_id);
+        if(resp) {
+            // set quiz status from "active" to "done" in database
+            await setQuizStatus(quiz_id, QuizStatus.Done);
+            // send end of quiz message and leaderboard
+        }
+    } catch (error) {
     console.error("Error:", error);
   }
 }

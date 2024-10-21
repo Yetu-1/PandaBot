@@ -71,7 +71,7 @@ export async function getQuizStatus(quiz_id : string) {
             return "Null";
         }
     }catch (err) {
-        console.error("Error storing quiz", err);
+        console.error("Error fetching quiz status", err);
         return "Error";
     }
 }
@@ -81,7 +81,7 @@ export async function setQuizStatus(quiz_id : string, status : string ) {
         await db.query("UPDATE quiz SET status=$1 WHERE quiz_id=$2", [status, quiz_id])
         return true;
     }catch (err) {
-        console.error("Error storing quiz", err);
+        console.error("Error setting quiz status", err);
         return false;
     }
 }

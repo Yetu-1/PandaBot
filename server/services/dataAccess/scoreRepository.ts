@@ -15,7 +15,7 @@ export async function storeScore(score: Score) : Promise<boolean>{
     }
 }
 
-export async function calculateScores(quiz_id : string ) {
+export async function calculateScores(quiz_id : string ) : Promise<boolean> {
     console.log("Calculating Scores!"); 
     try{
         // TODO: error handling
@@ -28,13 +28,14 @@ export async function calculateScores(quiz_id : string ) {
             const user_answers = await getUserAnswers(quiz_id , user.user_id);
             // use qusetions to calculate user score
             const score = calcUserScore(answers, user_answers);
-            // save score in database 
+            // save score in database
             console.log(user.user_id, ": ", score);
             await storeScore( {quiz_id: quiz_id, user_id: user.user_id, username: user.username, value: score} );
         })
-
+        return true;
     }catch(error) {
         console.error("Error", error);
+        return false;
     }
 }
 
