@@ -1,6 +1,5 @@
 import { db } from "./quizRepository.js";
 import { Answer, Score } from "../models.js";
-import { getQuiz } from "./quizRepository.js";
 import { getQuizUsers, getUserAnswers } from "./userAnswerRepository.js";
 import { getAnswers } from "./questionRepository.js";
 
@@ -49,4 +48,20 @@ function calcUserScore(answers : Answer[], user_answers: Answer[]) {
         }
     });
     return score;
+}
+
+export async function getScores(quiz_id : string) {
+    try{
+        const resp = await db.query("SELECT * FROM score WHERE quiz_id=$1", 
+            [quiz_id] );
+        if(resp.rows.length > 0) {
+            return resp.rows;
+        }
+        else {
+            return []
+        }
+    }catch(err) {
+        console.error("Error storing score", err)
+        return "Error"
+    }  
 }

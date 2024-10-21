@@ -167,7 +167,7 @@ discord_client.on("interactionCreate", async (interaction) => {
       interaction.reply(`The quiz is about to start. Duration: ${duration.value}!`);
   
       if(file1 && file1.attachment) {
-        const files: CommandInteractionOption[] = []; 
+        const files: CommandInteractionOption[] = [];
         files.push(file1);
         if(file2 && file2.attachment) // if the second file exists
           files.push(file2);
