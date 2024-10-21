@@ -54,10 +54,34 @@ export async function getQuiz(quiz_id: string) : Promise<any> {
         if(resp.rows.length > 0) {
             return resp.rows[0];
         }else {
-            return "NONE";
+            return "Null";
         }
     }catch (err) {
         console.error("Error storing quiz", err);
         return "Error";
+    }
+}
+
+export async function getQuizStatus(quiz_id : string) {
+    try {
+        const resp = await db.query("SELECT status FROM quiz WHERE quiz_id=$1", [quiz_id])
+        if(resp.rows.length > 0) {
+            return resp.rows[0];
+        }else {
+            return "Null";
+        }
+    }catch (err) {
+        console.error("Error storing quiz", err);
+        return "Error";
+    }
+}
+
+export async function setQuizStatus(quiz_id : string, status : string ) {
+    try {
+        await db.query("UPDATE quiz SET status=$1 WHERE quiz_id=$2", [status, quiz_id])
+        return true;
+    }catch (err) {
+        console.error("Error storing quiz", err);
+        return false;
     }
 }
