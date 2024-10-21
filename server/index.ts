@@ -92,61 +92,7 @@ discord_client.on("ready", () => {
 discord_client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   try {
-    // if (message.attachments.size > 0) {
-    //   console.log("Message has attachments");
-    //   const quiz: Quiz = {
-    //     status: 'success',
-    //     title: 'Color Theory Quiz',
-    //     id: 'e818fe5d-27a6-48f0-ae74-3224f16e9ac3',
-    //     channelId: message.channelId,
-    //     questions: [
-    //       {
-    //         question: 'Which of the following color pairs are considered complementary in the RGB color model?',
-    //         options: [ 'Red-Green', 'Green-Magenta', 'Blue-Orange', 'Yellow-Purple' ],
-    //         answer: '2'
-    //       },
-    //       {
-    //         question: 'According to the RYB color model, blue is complementary to which color?',
-    //         options: [ 'Orange', 'Yellow', 'Green', 'Red' ],
-    //         answer: '1'
-    //       },
-    //       {
-    //         question: 'What is produced when complementary colors are combined?',
-    //         options:  [
-    //           'A new color',
-    //           'A vibrant pattern',
-    //           'A grayscale color',
-    //           'A warm tone'
-    //         ],
-    //         answer: '3'
-    //       },
-    //       {
-    //         question: 'Which theory suggests that red-green and blue-yellow are the most contrasting pairs?',
-    //         options: [
-    //           'RGB Color Model',
-    //           'CMY Subtractive Model',
-    //           'Opponent Process Theory',
-    //           'RYB Color Model'
-    //         ],
-    //         answer: '3'
-    //       },
-    //       {
-    //         question: 'What is a common pair of complementary colors in all color theories?',
-    //         options: [ 'Red-Green', 'Blue-Yellow', 'Black-White', 'Purple-Orange' ],
-    //         answer: '3'
-    //       }
-    //     ]
-    //   }
-    //   const discordQuestions: {
-    //     embeds: any;
-    //     components: any;
-    //   }[] = quiz.questions.map((q, index) => createQuizMessage(q, index+1, quiz.id));
 
-    //   discordQuestions.forEach((q) => {
-    //     sendDiscordQuiz(q, message.channel.id);
-    //   });
-    //   console.log(quiz);
-    // }
   } catch (error) {
     console.error("Error:", error);
   }

@@ -50,6 +50,11 @@ async function sendNextQuestion(lastAnswer: QuizUserAnswer) {
       if(resp != 'End' && resp != 'Error') {
         // send that question to User's DM
         await sendQuestion(resp, lastAnswer.user_id);
+      }if(resp == 'End') {
+        const user = await discord_client.users.fetch(lastAnswer.user_id);
+        if (user) {
+          await user.send("That's a wrap! Thanks for participating!");
+        }
       }
       // console.log(resp);
     } catch (error) {
