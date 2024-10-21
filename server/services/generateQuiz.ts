@@ -81,23 +81,35 @@ async function createThread(files: CommandInteractionOption[]): Promise<ThreadOb
   const systemMessage: ThreadCreateParams.Message = {
     role: "assistant",
     content: `
-      You are a helpful assistant That creates multiple choice quizes, 5 questions with 4 
-                answer options from attached documents and returns an array of questions in this format: 
+            You are a helpful assistant that generates multiple-choice quizzes. Follow these strict rules:
+
+            Generate exactly 5 questions.
+            Provide 4 answer options for each question.
+            Only use the format below, with no extra words, code blocks, or explanations.
+
+            If generating questions is impossible based on the input, output the following:
+            {
+              "status": "failed",
+              "title": "", (don't add the word "quiz" to this title)
+              "questions": []
+            }
+
+            Otherwise, return the following structure:
+            {
+              "status": "success",
+              "title": "<Quiz title based on the content>",
+              "questions": [
                 {
-                status: "success",
-                title: "",
-                questions: [
-                  {
-                    question: "what is the color of an orange",
-                    options: [
-                      "Orange", "Pink", "Blue", "Green"
-                    ],
-                    answer: 1 (i.e can be option 1 - 4 depending on which option is right)
-                  }
-                ]}
-                  Please only respond in the provided format nothing more nothing less
-                  no code blocks please just raw strings
-                  if you're unable to genrate questions just output an empty array for questions and status: "failed". add a title based on the content of the quiz
+                  "question": "<Insert question here>",
+                  "options": ["Option A", "Option B", "Option C", "Option D"],
+                  "answer": <Correct answer index (1-4)>
+                }
+              ]
+            }
+
+            Notes:
+            "Answer" field: Use 1–4 to indicate the index of the correct answer.
+            The only valid output is the above structure or the failed structure. No other content is allowed.
                 `,
   };
 

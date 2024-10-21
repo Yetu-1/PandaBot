@@ -15,7 +15,7 @@ export async function connect() {
   }
 }
 
-export async function sendMessage(answer: object) {
+export async function sendUserResponse(answer: object) {
   // Send message to the specified topic
   try {
     await producer.send({
