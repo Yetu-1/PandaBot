@@ -48,7 +48,7 @@ async function createQuizEntry(quiz: QuizEntry): Promise<boolean>{
     }
 }
 
-export async function getQuiz(quiz_id: string) {
+export async function getQuiz(quiz_id: string) : Promise<any> {
     try {
         const resp = await db.query("SELECT * FROM quiz WHERE quiz_id=$1", [quiz_id])
         if(resp.rows.length > 0) {

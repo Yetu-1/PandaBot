@@ -90,7 +90,7 @@ async function createThread(files: CommandInteractionOption[]): Promise<ThreadOb
             If generating questions is impossible based on the input, output the following:
             {
               "status": "failed",
-              "title": "",
+              "title": "", (don't add the word "quiz" to this title)
               "questions": []
             }
 
