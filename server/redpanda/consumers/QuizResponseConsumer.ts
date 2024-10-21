@@ -23,11 +23,11 @@ export async function init() {
       eachMessage: async ({ topic, partition, message }) => {
         const messageObject = JSON.parse(message.value?.toString() || "{}");
         const response = messageObject.answer;
-        console.log(response);
+        // console.log(response);
         if(response.type === 'answer') {
           // Save user response into database
           await storeUserAnswer(response);
-          console.log("user answer saved!")
+          // console.log("user answer saved!")
           // send next question
           await sendNextQuestion(response);
 
@@ -51,7 +51,7 @@ async function sendNextQuestion(lastAnswer: QuizUserAnswer) {
         // send that question to User's DM
         await sendQuestion(resp, lastAnswer.user_id);
       }
-      console.log(resp);
+      // console.log(resp);
     } catch (error) {
       console.error("Error:", error);
     }
