@@ -24,27 +24,29 @@ function getEmojiFromNumber(number: number): string {
   }
 }
 
-export function createQuizMessage(question: QuizQuestion, number: number, quizId: string): {
+export function createQuizMessage(question: QuizQuestion): {
   embeds: any;
   components: any;
 } {
   const embed = new EmbedBuilder()
     .setColor(0x3498db)
-    .setTitle("Quiz Time!")
-    .setDescription(question.question);
+    .setTitle(`(${question.number}) ${question.question}`)
+    .setDescription(question.options.map((option, index) => `${getEmojiFromNumber(index + 1)}  ${option}` ).join('\n\n'));
 
-  question.options.forEach((option, index) => {
-    embed.addFields({
-      name: `${getEmojiFromNumber(index + 1)}`,
-      value: option,
-      inline: true,
-    });
-  });
+  // question.options.map((option, index) => `${getEmojiFromNumber(index + 1)} ${option}` ).join('\n');
+
+  // question.options.forEach((option, index) => {
+  //   embed.addFields({
+  //     name: `${getEmojiFromNumber(index + 1)}`,
+  //     value: option,
+  //     inline: true,
+  //   });
+  // });
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     question.options.map((_, index) =>
       new ButtonBuilder()
-        .setCustomId(`qz:${quizId}:${number}:${index + 1}`)
+        .setCustomId(`qz:${question.quiz_id}:${question.number}:${index + 1}`)
         .setLabel(`${index + 1}`)
         .setStyle(ButtonStyle.Primary)
     )

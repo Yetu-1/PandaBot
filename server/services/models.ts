@@ -10,9 +10,11 @@ export interface ThreadObj {
   quizFiles: FileObject[];
 }
 export interface QuizQuestion {
+  quiz_id: string;
   question: string;
   answer: string;
   options: string[];
+  number: string;
 }
 
 export interface QuizRequest {
@@ -23,6 +25,8 @@ export interface QuizRequest {
 export interface Quiz {
   status: "success" | "failure";
   id: string;
+  title: string;
+  channelId: string;
   questions: QuizQuestion[];
 }
 
@@ -31,4 +35,35 @@ export interface AIAnswerDiscord {
   status: "success" | "failure";
   answer: string;
   error: string;
+}
+export interface QuizEntry {
+  id: string
+  title: string
+  channel_id: string
+}
+
+export interface QuizUserAnswer {
+  user_id: string;
+  username: string;
+  quiz_id: string;
+  question_number: string;
+  answer: string;
+  type: string;
+}
+
+export interface Score {
+    user_id: string;
+    username: string;
+    quiz_id: string;
+    value: number;
+}
+
+export interface Answer {
+  number: string;
+  answer: string;
+}
+
+export enum QuizStatus {
+  Active = 'active',
+  Done = 'done'
 }

@@ -1,23 +1,26 @@
 import {
-  ButtonInteraction,
   ChatInputCommandInteraction,
   CommandInteractionOption,
-  Message,
+  Message
 } from "discord.js";
 import * as Admin from "./redpanda/admin.js";
-import * as MessageConsumer from "./redpanda/consumers/toxicity_check_consumer.js";
-import * as MessageProducer from "./redpanda/producers/discord_msg_producer.js";
+import * as MessageConsumer from "./redpanda/consumers/ToxicityCheckConsumer.js";
+import * as MessageProducer from "./redpanda/producers/DiscordMsgProducer.js";
 import { discord_client } from "./services/config.js";
-import { createQuizMessage } from "./services/createDiscordQuestion.js";
-import { generateQuiz } from "./services/generateQuiz.js";
-import { FileObj, Quiz } from "./services/models.js";
 
-import * as QuizConsumer from "./redpanda/consumers/quiz_response_consumer.js";
-import * as QuizProducer from "./redpanda/producers/quiz_response_producer.js";
+import * as QuizConsumer from "./redpanda/consumers/QuizResponseConsumer.js";
+import * as QuizProducer from "./redpanda/producers/QuizResponseProducer.js";
 
-import { saveQuiz } from "./services/dataAccess/quizRepository.js";
+import * as QuizDBConsumer from "./redpanda/consumers/QuizGenerationConsumer.js";
+import * as QuizDBProducer from "./redpanda/producers/QuizRequestProducer.js";
+
+import * as EndQuizConsumer from "./redpanda/consumers/EndQuizConsumer.js";
+import * as EndQuizProducer from "./redpanda/producers/EndQuizProducer.js";
+
 import generateAnswerForDiscordBotAI from "./services/generateAnswerForDiscordBotAI.js";
+import { FileObj } from "./services/models.js";
 import { registerCommands } from "./services/registerCommands.js";
+import { sendUserResponse } from "./services/sendUserResponse.js";
 
 async function sendMessage(content: string, channelId: string) {
   try {
@@ -60,15 +63,20 @@ async function sendDiscordQuiz(
 async function setupServer() {
   try {
     // Create topic
-    const msg_topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
+    // const msg_topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
     const quiz_topic = process.env.QUIZ_RESPONSE_TOPIC || "default-topic";
-    await Admin.createTopic([msg_topic, quiz_topic]);
+    const quiz_db_topic = process.env.QUIZ_DB_TOPIC || "default-topic";
+    await Admin.createTopic([quiz_topic, quiz_db_topic]);
     // Connect producers to repanda broker
-    await MessageProducer.connect();
+    // await MessageProducer.connect();
     await QuizProducer.connect();
+    await QuizDBProducer.connect();
+    await EndQuizProducer.connect();
     // Initialize consumners to repanda broker and subscribe to specified topic to consume messages
-    await MessageConsumer.init();
+    // await MessageConsumer.init();
     await QuizConsumer.init();
+    await QuizDBConsumer.init();
+    await EndQuizConsumer.init();
     // Login discord bot
     discord_client.login(process.env.DISCORD_TOKEN);
     registerCommands();
@@ -122,72 +130,52 @@ discord_client.on("ready", () => {
 discord_client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   try {
-    if (message.attachments.size > 0) {
-      console.log("Message has attachments");
-      const quizStr = await generateQuiz(getFilesFromMessage(message));
-      const quiz: Quiz = JSON.parse(quizStr); //
-
-      const discordQuestions: {
-        embeds: any;
-        components: any;
-      }[] = quiz.questions.map((q, index) =>
-        createQuizMessage(q, index + 1, quiz.id)
-      );
-
-      discordQuestions.forEach((q) => {
-        sendDiscordQuiz(q, message.channel.id);
-      });
-      console.log(quiz);
-    }
-    // await Producer.sendMessage(message);
   } catch (error) {
     console.error("onMessageCreateError:", error);
   }
 });
 
 discord_client.on("interactionCreate", async (interaction) => {
-  console.log("NewInteraction", interaction);
-  if (!interaction.isButton) {
-    const buttonInteraction = interaction as ButtonInteraction;
-    const params = buttonInteraction.customId.split(":");
-    // filter by quiz button. structure of quiz button = 'qz:quizid:qn:opt'
-    if (params[0] != "qz") return;
-    console.log(params);
+  if (interaction.isButton()) {
+    // Send user response to redpanda broker
+    sendUserResponse(interaction);
   }
   // check if interaction is not a slash command
-  if (!interaction.isChatInputCommand()) return;
+  if (interaction.isChatInputCommand()) {
+    if (interaction.commandName == "start-quiz") {
+      // Get all options
+      const file1 = interaction.options.get("file1");
+      const file2 = interaction.options.get("file2");
+      const duration = interaction.options.get("duration") || {
+        name: "duration",
+        type: 10,
+        value: 0,
+      };
+      const time = duration.value as number;
+      interaction.reply(
+        `The quiz is about to start. Duration: ${duration.value}!`
+      );
 
-  if (interaction.commandName == "start-quiz") {
-    const files = getFilesFromChatCommandInteraction(interaction);
-    const duration = interaction.options.get("duration") || {
-      name: "duration",
-      type: 10,
-      value: 0,
-    };
-
-    interaction.reply(
-      `The quiz is about to start. Duration: ${duration.value}!`
-    );
-
-    if (files.length > 0) {
-      const quiz = await generateQuiz(files);
-
-      if (quiz.status == "success") {
-        await saveQuiz(quiz, interaction.channelId);
+      if (file1 && file1.attachment) {
+        const files: CommandInteractionOption[] = [];
+        files.push(file1);
+        if (file2 && file2.attachment)
+          // if the second file exists
+          files.push(file2);
+        // send quiz to quiz generation consumer to generate, store and start quiz
+        await QuizDBProducer.sendQuiz(files, interaction.channelId, time);
       }
-      await sendMessage(quiz, interaction.channelId);
-      console.log(quiz);
-    }
-  } else if (interaction.commandName == "ask-ai-anything") {
-    const aiAnswer = await generateAnswerForDiscordBotAI(
-      interaction.options.get("question")?.value?.toString() ||
-        "Could not generate AI answer"
-    );
-    if (aiAnswer.status == "success") {
-      interaction.reply(aiAnswer.answer);
-    } else {
-      interaction.reply(`Could not generate AI answer
-        reason: ${aiAnswer.error}`);
+    } else if (interaction.commandName == "ask-ai-anything") {
+      const aiAnswer = await generateAnswerForDiscordBotAI(
+        interaction.options.get("question")?.value?.toString() ||
+          "Could not generate AI answer"
+      );
+      if (aiAnswer.status == "success") {
+        interaction.reply(aiAnswer.answer);
+      } else {
+        interaction.reply(`Could not generate AI answer
+          reason: ${aiAnswer.error}`);
+      }
     }
   }
 });
@@ -200,6 +188,10 @@ process.on("SIGINT", async () => {
     await MessageConsumer.disconnect();
     await QuizProducer.disconnect();
     await QuizConsumer.disconnect();
+    await QuizDBProducer.disconnect();
+    await QuizDBConsumer.disconnect();
+    await EndQuizProducer.disconnect();
+    await EndQuizConsumer.disconnect();
   } catch (err) {
     console.error("Error during cleanup:", err);
     process.exit(1);

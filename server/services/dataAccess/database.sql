@@ -20,16 +20,23 @@ CREATE TABLE question (
 CREATE TABLE user_answer (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(20),
+    username VARCHAR(50),
     quiz_id uuid REFERENCES quiz(quiz_id) ON DELETE CASCADE,
-    question_number INTEGER,
+    number INTEGER,
     answer INTEGER,
-    CONSTRAINT unique_user_answer UNIQUE (user_id, quiz_id, question_number)
+    CONSTRAINT unique_user_answer UNIQUE (user_id, quiz_id, number)
 );
 
 -- scores table 
 CREATE TABLE score (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(20),
+    username VARCHAR(50),
     quiz_id uuid REFERENCES quiz(quiz_id) ON DELETE CASCADE,
-    score INTEGER
+    score INTEGER,
+    CONSTRAINT unique_score_entry UNIQUE (user_id, quiz_id)
 );
+
+--  -- change question_number column name to number
+-- ALTER TABLE user_answer
+-- RENAME COLUMN question_number to number;
