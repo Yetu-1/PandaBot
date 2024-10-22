@@ -20,6 +20,12 @@ const commands = [
         required: true,
       },
       {
+        name: "number-of-questions",
+        description: "Duration of quiz in minutes",
+        type: ApplicationCommandOptionType.Number,
+        required: true,
+      },
+      {
         name: "duration",
         description: "Duration of quiz in minutes",
         type: ApplicationCommandOptionType.Number,

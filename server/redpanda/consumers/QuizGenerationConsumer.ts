@@ -24,7 +24,6 @@ export async function init() {
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         const messageObject = JSON.parse(message.value?.toString() || "{}");
-        console.log("consumer received quiz object");
         console.log(messageObject);
         // Generate quiz
         const quiz = await generateQuiz(messageObject.files);

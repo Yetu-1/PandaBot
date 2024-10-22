@@ -11,6 +11,16 @@ import { FileObj, ThreadObj } from "./models.js";
 
 env.config();
 const openai = new OpenAI();
+// Asynchronously delete a file with async/await
+async function deleteFile(filePath : string) {
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log('File deleted from local dir successfully');
+  });
+}
 
 async function downloadFile(uri: string, fileName: string): Promise<string> {
   const response = await axios.get(uri, { responseType: "stream" });
@@ -58,10 +68,12 @@ async function createQuizAssistant(): Promise<Assistant> {
 }
 
 async function createThread(files: FileObj[]): Promise<ThreadObj> {
+  const localFiles : string[] = []
   const quizFiles = await Promise.all(
     files.map(async ( file ) => {
       if(file) { // Make sure attachment exists
         const path = await downloadFile(file.url, file.name);
+        localFiles.push(path);
         return await openai.files.create({
           file: fs.createReadStream(path),
           purpose: "assistants",
@@ -71,12 +83,17 @@ async function createThread(files: FileObj[]): Promise<ThreadObj> {
       }
     })
   );
-  
+
   const attachments = quizFiles.map(
     (file): ThreadCreateParams.Message.Attachment => {
       return { file_id: file?.id, tools: [{ type: "file_search" }] };
     }
   );
+
+  // Delete files from local directory
+  localFiles.forEach(async (path) => {
+    await deleteFile(path);
+  })
 
   const systemMessage: ThreadCreateParams.Message = {
     role: "assistant",

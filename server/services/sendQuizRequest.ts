@@ -25,21 +25,20 @@ export async function sendQuizRequest(interaction: ChatInputCommandInteraction) 
 }
 
 function getFilesFromChatCommandInteraction( interaction: ChatInputCommandInteraction<any> ): FileObj[] {
-    const files: FileObj[] = [];
-    const file1: CommandInteractionOption | null = interaction.options.get("file1");
-    const file2: CommandInteractionOption | null = interaction.options.get("file2");
-    if (file1 && file1.attachment) {
-      files.push({
-        name: file1.attachment.name,
-        url: file1.attachment.url,
-      });
-    }
-    if (file2 && file2.attachment) {
-      files.push({
-        name: file2.name,
-        url: file2.attachment.url,
-      });
-    }
-    console.log(files);
-    return files;
+  const files: FileObj[] = [];
+  const file1: CommandInteractionOption | null = interaction.options.get("file1");
+  const file2: CommandInteractionOption | null = interaction.options.get("file2");
+  if (file1 && file1.attachment) {
+    files.push({
+      name: file1.attachment.name,
+      url: file1.attachment.url,
+    });
+  }
+  if (file2 && file2.attachment) {
+    files.push({
+      name: file2.name,
+      url: file2.attachment.url,
+    });
+  }
+  return files;
 }
