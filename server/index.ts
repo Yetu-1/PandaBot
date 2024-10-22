@@ -1,25 +1,26 @@
-import env from "dotenv";
+import {
+  ChatInputCommandInteraction,
+  CommandInteractionOption,
+  Message
+} from "discord.js";
+import * as Admin from "./redpanda/admin.js";
+import * as MessageConsumer from "./redpanda/consumers/ToxicityCheckConsumer.js";
+import * as MessageProducer from "./redpanda/producers/DiscordMsgProducer.js";
 import { discord_client } from "./services/config.js";
 
-import { CommandInteractionOption, GatewayIntentBits } from "discord.js";
-import * as Admin from "./redpanda/admin.js";
-import * as MessageProducer from "./redpanda/producers/DiscordMsgProducer.js";
-import * as MessageConsumer from "./redpanda/consumers/ToxicityCheckConsumer.js";
-
-import * as QuizProducer from "./redpanda/producers/QuizResponseProducer.js";
 import * as QuizConsumer from "./redpanda/consumers/QuizResponseConsumer.js";
+import * as QuizProducer from "./redpanda/producers/QuizResponseProducer.js";
 
-import * as QuizDBProducer from "./redpanda/producers/QuizRequestProducer.js";
 import * as QuizDBConsumer from "./redpanda/consumers/QuizGenerationConsumer.js";
+import * as QuizDBProducer from "./redpanda/producers/QuizRequestProducer.js";
 
-import * as EndQuizProducer from "./redpanda/producers/EndQuizProducer.js";
 import * as EndQuizConsumer from "./redpanda/consumers/EndQuizConsumer.js";
+import * as EndQuizProducer from "./redpanda/producers/EndQuizProducer.js";
 
+import generateAnswerForDiscordBotAI from "./services/generateAnswerForDiscordBotAI.js";
+import { FileObj } from "./services/models.js";
 import { registerCommands } from "./services/registerCommands.js";
 import { sendUserResponse } from "./services/sendUserResponse.js";
-import { endQuiz } from "./redpanda/consumers/EndQuizConsumer.js";
-
-env.config();
 
 async function sendMessage(content: string, channelId: string) {
   try {
@@ -35,7 +36,7 @@ async function sendMessage(content: string, channelId: string) {
   } catch (error) {
     console.error("Error:", error);
   }
-} 
+}
 
 async function sendDiscordQuiz(
   messageObj: {
@@ -77,49 +78,103 @@ async function setupServer() {
     await QuizDBConsumer.init();
     await EndQuizConsumer.init();
     // Login discord bot
-  discord_client.login(process.env.DISCORD_TOKEN);
+    discord_client.login(process.env.DISCORD_TOKEN);
+    registerCommands();
   } catch (error) {
-    console.error("Error:", error);
+    console.error("InitializeError:", error);
   }
 }
- 
+
+function getFilesFromChatCommandInteraction(
+  interaction: ChatInputCommandInteraction<any>
+): FileObj[] {
+  const files: FileObj[] = [];
+  const file1: CommandInteractionOption | null =
+    interaction.options.get("file1");
+  const file2: CommandInteractionOption | null =
+    interaction.options.get("file2");
+  if (file1 && file1.attachment) {
+    files.push({
+      name: file1.name,
+      url: file1.attachment.url,
+    });
+  }
+  if (file2 && file2.attachment) {
+    files.push({
+      name: file2.name,
+      url: file2.attachment.url,
+    });
+  }
+  return files;
+}
+
+function getFilesFromMessage(message: Message): FileObj[] {
+  const files: FileObj[] = [];
+  if (message.attachments.size > 0) {
+    message.attachments.forEach((attachment) => {
+      files.push({
+        name: attachment.name,
+        url: attachment.url,
+      });
+    });
+  }
+  return files;
+}
+
 setupServer();
 
 discord_client.on("ready", () => {
   console.log("Bot is online!");
-})
+});
 
 discord_client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   try {
-
   } catch (error) {
-    console.error("Error:", error);
+    console.error("onMessageCreateError:", error);
   }
 });
 
 discord_client.on("interactionCreate", async (interaction) => {
-  if(interaction.isButton()) {
+  if (interaction.isButton()) {
     // Send user response to redpanda broker
     sendUserResponse(interaction);
   }
   // check if interaction is not a slash command
   if (interaction.isChatInputCommand()) {
-    if(interaction.commandName == 'start-quiz') {
+    if (interaction.commandName == "start-quiz") {
       // Get all options
-      const file1 = interaction.options.get('file1');
-      const file2 = interaction.options.get('file2');
-      const duration = interaction.options.get('duration') || { name: 'duration', type: 10, value: 0 }
+      const file1 = interaction.options.get("file1");
+      const file2 = interaction.options.get("file2");
+      const duration = interaction.options.get("duration") || {
+        name: "duration",
+        type: 10,
+        value: 0,
+      };
       const time = duration.value as number;
-      interaction.reply(`The quiz is about to start. Duration: ${duration.value}!`);
-  
-      if(file1 && file1.attachment) {
+      interaction.reply(
+        `The quiz is about to start. Duration: ${duration.value}!`
+      );
+
+      if (file1 && file1.attachment) {
         const files: CommandInteractionOption[] = [];
         files.push(file1);
-        if(file2 && file2.attachment) // if the second file exists
+        if (file2 && file2.attachment)
+          // if the second file exists
           files.push(file2);
         // send quiz to quiz generation consumer to generate, store and start quiz
         await QuizDBProducer.sendQuiz(files, interaction.channelId, time);
+      }
+    } else if (interaction.commandName == "ask-ai-anything") {
+      const aiAnswer = await generateAnswerForDiscordBotAI(
+        interaction.options.get("question")?.value?.toString() ||
+          "Could not generate AI answer"
+      );
+      if (aiAnswer.status == "success") {
+        interaction.reply(aiAnswer.answer);
+      } else {
+        interaction.reply(`Could not generate AI answer
+          reason: ${aiAnswer.error}`);
       }
     }
   }
