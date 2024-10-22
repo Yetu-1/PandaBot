@@ -3,6 +3,7 @@ CREATE TABLE quiz (
     quiz_id uuid PRIMARY KEY,
     quiz_title text,
     channel_id VARCHAR(20)
+    status VARCHAR(7)
 );
 
 -- question table 

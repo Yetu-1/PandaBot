@@ -1,11 +1,11 @@
 import { redpanda } from "../redpanda_config.js";
 import { discord_client } from "../../services/config.js";
-import { storeUserAnswer } from "../../services/dataAccess/userAnswerRepository.js";
+import { getUserAnswers, storeUserAnswer } from "../../services/dataAccess/userAnswerRepository.js";
 import env from "dotenv"
 import { QuizQuestion, QuizUserAnswer } from "../../services/models.js";
-import { getQuestion } from "../../services/dataAccess/questionRepository.js";
+import { getQuestion, getQuestions } from "../../services/dataAccess/questionRepository.js";
 import { createQuizMessage } from "../../services/createDiscordQuestion.js";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, getUserAgentAppendix } from "discord.js";
 env.config();
 
 const groupId = process.env.QUIZ_GROUP_ID || "default-groupy";
@@ -53,7 +53,8 @@ async function sendNextQuestion(lastAnswer: QuizUserAnswer) {
       }if(resp == 'End') {
         const user = await discord_client.users.fetch(lastAnswer.user_id);
         if (user) {
-          await user.send("That's a wrap! Thanks for participating!");
+          // Send user answer report
+          await sendUserAnswerReport(lastAnswer.quiz_id, lastAnswer.user_id);
         }
       }
       // console.log(resp);
@@ -100,6 +101,58 @@ async function sendStartQuizPrompt(quiz: QuizUserAnswer) {
     const user = await discord_client.users.fetch(quiz.user_id);
     await user.send(message);
   } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+export async function sendUserAnswerReport(quiz_id: string, user_id: string) {
+  try {
+    // Get all the questions for the quiz
+    const questions = await getQuestions(quiz_id);
+    // Get all the user's answers
+    const user_answers = await getUserAnswers(quiz_id, user_id);
+    console.log(user_answers);
+    if(questions != 'NONE' && questions != "Error") {
+      let report_content = questions.map( (question : any) => {
+        return (
+          `(${question.number}) ${question.question}\n` + 
+          question.options.map((option : string, index:number) => {
+            const opt_text = ` (${index+1}) ${option} `;
+            const user_answer = user_answers.filter((answer : any) => question.number == answer.number); // get user answer for the question
+            let suffix = ''
+            if(index+1 == question.answer ) 
+              suffix = '✅';
+            else if(index+1 == user_answer[0].answer && index+1 != question.answer)
+              suffix = '❌';
+            return ( opt_text + suffix)
+          })
+          .join('\n')
+        )
+      }).join('\n\n\n')
+      
+      report_content = `\`\`\`\n${report_content}\n\`\`\`` // put the report in a code block
+      // construct message
+      // Create button row for each answer
+      const embed = new EmbedBuilder()
+      .setColor(0x3498db)
+      .setTitle("Thats a wrap!")
+      .setDescription('Time to see how you did.')
+      .addFields(
+          {
+              name: 'Review Questions and Answers:',
+              value: report_content
+          }
+      )
+
+      const report = {
+      embeds: [embed]
+      };
+      const user = await discord_client.users.fetch(user_id);
+      if (user) {
+        await user.send(report);
+      }
+    }
+  }catch (error) {
     console.error("Error:", error);
   }
 }

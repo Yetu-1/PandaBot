@@ -43,3 +43,18 @@ export async function getAnswers(quiz_id: string) : Promise<any> {
         return "Error";
     }
 }
+
+export async function getQuestions(quiz_id: string) {
+    try {
+        // Fetch question from db using the quiz id and question number
+        const resp = await db.query("SELECT * FROM question WHERE quiz_id=$1", [quiz_id]);
+        if(resp.rows.length > 0) {
+            return resp.rows;
+        }else {
+            return "NONE";
+        }
+    }catch (err) {
+        console.error("Error fetching quiz questions", err);
+        return "Error";
+    }  
+}
