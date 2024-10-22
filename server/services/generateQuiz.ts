@@ -68,12 +68,12 @@ async function createQuizAssistant(): Promise<Assistant> {
 }
 
 async function createThread(files: FileObj[]): Promise<ThreadObj> {
-  const localFiles : string[] = []
+  const localFilesPath : string[] = []
   const quizFiles = await Promise.all(
     files.map(async ( file ) => {
       if(file) { // Make sure attachment exists
         const path = await downloadFile(file.url, file.name);
-        localFiles.push(path);
+        localFilesPath.push(path);
         return await openai.files.create({
           file: fs.createReadStream(path),
           purpose: "assistants",
@@ -91,7 +91,7 @@ async function createThread(files: FileObj[]): Promise<ThreadObj> {
   );
 
   // Delete files from local directory
-  localFiles.forEach(async (path) => {
+  localFilesPath.forEach(async (path) => {
     await deleteFile(path);
   })
 

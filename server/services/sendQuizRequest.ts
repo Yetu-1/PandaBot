@@ -36,7 +36,7 @@ function getFilesFromChatCommandInteraction( interaction: ChatInputCommandIntera
   }
   if (file2 && file2.attachment) {
     files.push({
-      name: file2.name,
+      name: file2.attachment.name,
       url: file2.attachment.url,
     });
   }
