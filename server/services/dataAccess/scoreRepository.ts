@@ -1,6 +1,6 @@
 import { db } from "./quizRepository.js";
 import { Answer, Score } from "../models.js";
-import { getQuizUsers, getUserAnswers } from "./userAnswerRepository.js";
+import { getQuizParticipants, getUserAnswers } from "./userAnswerRepository.js";
 import { getAnswers } from "./questionRepository.js";
 
 export async function storeScore(score: Score) : Promise<boolean>{
@@ -9,7 +9,7 @@ export async function storeScore(score: Score) : Promise<boolean>{
             [score.user_id, score.username, score.quiz_id, score.value] );
         return true;
     }catch(err) {
-        console.error("Error storing score", err)
+        console.error("Error storing score: ", err)
         return false;
     }
 }
@@ -20,8 +20,8 @@ export async function calculateScores(quiz_id : string ) : Promise<boolean> {
         // TODO: error handling
         const answers = await getAnswers(quiz_id);
         console.log(answers);
-        // Get all unique users who have responses for that quiz
-        const users = await getQuizUsers(quiz_id);
+        // Get all unique users who participated in the quiz
+        const users = await getQuizParticipants(quiz_id);
         users.forEach(async (user: any) => {
             // Get each user's answers
             const user_answers = await getUserAnswers(quiz_id , user.user_id);
@@ -33,7 +33,7 @@ export async function calculateScores(quiz_id : string ) : Promise<boolean> {
         })
         return true;
     }catch(error) {
-        console.error("Error", error);
+        console.error("Error calculating scores: ", error);
         return false;
     }
 }
@@ -61,7 +61,7 @@ export async function getScores(quiz_id : string) {
             return []
         }
     }catch(err) {
-        console.error("Error storing score", err)
+        console.error("Error fetching score: ", err)
         return "Error"
     }  
 }

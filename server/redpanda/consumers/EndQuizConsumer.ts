@@ -27,7 +27,7 @@ export async function init() {
       }
     });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error initializing end quiz consumer: ", error);
   }
 }
 
@@ -50,7 +50,7 @@ export async function endQuiz(quiz_id : string ) {
             }
         }
     } catch (error) {
-    console.error("Error:", error);
+    console.error("Error ending quiz: ", error);
   }
 }
 
@@ -79,7 +79,7 @@ async function sendLeaderboard(quiz_title: string, scores : any[], channel_id: s
           await channel.send(scoreBoard)
         }
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error sending leaderboard: ", error);
       }
   }
 
@@ -88,6 +88,6 @@ export async function disconnect() {
   try {
     await consumer.disconnect();
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error disconnecting end quiz consumer: ", error);
   }
 }

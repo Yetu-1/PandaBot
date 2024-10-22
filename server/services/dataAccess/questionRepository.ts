@@ -9,7 +9,7 @@ export async function storeQuestions(quizQuestions: QuizQuestion[], quiz_id: str
         });
         return true;
     }catch (err) {
-        console.error("Error storing quiz questions", err);
+        console.error("Error storing quiz questions: ", err);
         return false;
     }
 }
@@ -24,7 +24,7 @@ export async function getQuestion(quiz_id: string, number: number) : Promise<any
             return "End";
         }
     }catch (err) {
-        console.error("Error fetching quiz questions", err);
+        console.error("Error fetching quiz question: ", err);
         return "Error";
     }
 }
@@ -39,7 +39,22 @@ export async function getAnswers(quiz_id: string) : Promise<any> {
             return "NONE";
         }
     }catch (err) {
-        console.error("Error fetching quiz questions", err);
+        console.error("Error fetching quiz answers: ", err);
         return "Error";
     }
+}
+
+export async function getQuestions(quiz_id: string) {
+    try {
+        // Fetch question from db using the quiz id and question number
+        const resp = await db.query("SELECT * FROM question WHERE quiz_id=$1", [quiz_id]);
+        if(resp.rows.length > 0) {
+            return resp.rows;
+        }else {
+            return "NONE";
+        }
+    }catch (err) {
+        console.error("Error fetching quiz questions: ", err);
+        return "Error";
+    }  
 }

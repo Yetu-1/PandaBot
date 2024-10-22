@@ -49,13 +49,13 @@ export async function init() {
               await channel.send("Could not Generate Quiz!");
             }
           } catch (error) {
-            console.error("Error:", error);
+            console.error("Error sending Could not Generate Quiz! msg: ", error);
           }
         }
       },
     });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error initializing quiz generation consumer: ", error);
   }
 }
 
@@ -64,7 +64,7 @@ async function endQuiz(quiz_id : string) {
     // end quiz producer
     await EndQuizProducer.endQuiz(quiz_id);
   }catch (error) {
-    console.error("Error:", error);
+    console.error("Error sending end quiz id to redpanda broker: ", error);
   }
 }
 
@@ -92,7 +92,7 @@ async function sendParticpateButton(quiz: Quiz, quiz_id: string, channel_id: str
       await channel.send(message);
     }
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error sending participate button: ", error);
   }
 }
 
@@ -100,7 +100,7 @@ export async function disconnect() {
   try {
     await consumer.disconnect();
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error disconnecting quiz generation consumer: ", error);
   }
 }
 

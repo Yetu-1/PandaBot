@@ -12,7 +12,7 @@ export async function connect() {
   try {
     await producer.connect();
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error connecting quiz request producer: ", error);
   }
 }
 
@@ -24,7 +24,7 @@ export async function sendQuiz(files: CommandInteractionOption[], channelId: str
       messages: [{ value: JSON.stringify({ files, channelId, duration }) }]
     });
   }catch (error) {
-    console.error("Error:", error);
+    console.error("Error sending quiz to repanda broker: ", error);
   }
 }
 
@@ -33,6 +33,6 @@ export async function disconnect() {
     // Disconnet producer from redpanda broker
     await producer.disconnect();
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error disconnection quiz request producer: ", error);
   } 
 }

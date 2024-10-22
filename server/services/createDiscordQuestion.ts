@@ -33,16 +33,6 @@ export function createQuizMessage(question: QuizQuestion): {
     .setTitle(`(${question.number}) ${question.question}`)
     .setDescription(question.options.map((option, index) => `${getEmojiFromNumber(index + 1)}  ${option}` ).join('\n\n'));
 
-  // question.options.map((option, index) => `${getEmojiFromNumber(index + 1)} ${option}` ).join('\n');
-
-  // question.options.forEach((option, index) => {
-  //   embed.addFields({
-  //     name: `${getEmojiFromNumber(index + 1)}`,
-  //     value: option,
-  //     inline: true,
-  //   });
-  // });
-
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     question.options.map((_, index) =>
       new ButtonBuilder()

@@ -33,7 +33,7 @@ export async function saveQuiz(quiz: Quiz, channel_id: string) : Promise<string>
         }
         return '';
     }catch (err) {
-        console.error("Error saving quiz", err);
+        console.error("Error saving quiz: ", err);
         return '';
     }
 }
@@ -43,7 +43,7 @@ async function createQuizEntry(quiz: QuizEntry): Promise<boolean>{
         await db.query("INSERT INTO quiz (quiz_id, quiz_title, channel_id) VALUES ($1, $2, $3)", [quiz.id, quiz.title, quiz.channel_id])
         return true;
     }catch (err) {
-        console.error("Error storing quiz", err);
+        console.error("Error storing quiz: ", err);
         return false;
     }
 }
@@ -57,7 +57,7 @@ export async function getQuiz(quiz_id: string) : Promise<any> {
             return "Null";
         }
     }catch (err) {
-        console.error("Error storing quiz", err);
+        console.error("Error fetching quiz: ", err);
         return "Error";
     }
 }
@@ -71,7 +71,7 @@ export async function getQuizStatus(quiz_id : string) {
             return "Null";
         }
     }catch (err) {
-        console.error("Error fetching quiz status", err);
+        console.error("Error fetching quiz status: ", err);
         return "Error";
     }
 }
@@ -81,7 +81,7 @@ export async function setQuizStatus(quiz_id : string, status : string ) {
         await db.query("UPDATE quiz SET status=$1 WHERE quiz_id=$2", [status, quiz_id])
         return true;
     }catch (err) {
-        console.error("Error setting quiz status", err);
+        console.error("Error setting quiz status: ", err);
         return false;
     }
 }

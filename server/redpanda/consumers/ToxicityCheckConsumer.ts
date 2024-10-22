@@ -43,7 +43,7 @@ export async function init() {
       },
     });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error initializing toxicity check consumer: ", error);
   }
 }
 
@@ -51,6 +51,6 @@ export async function disconnect() {
   try {
     await consumer.disconnect();
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error disconnecting toxicity check consumer: ", error);
   }
 }
