@@ -4,10 +4,9 @@ import fs from "fs";
 import OpenAI from "openai";
 import { Assistant } from "openai/resources/beta/assistants.mjs";
 import { ThreadCreateParams } from "openai/resources/beta/index.mjs";
-import { Thread } from "openai/src/resources/beta/index.js";
-import { Message, CommandInteractionOption } from "discord.js";
 import { FileObject } from "openai/resources/files.mjs";
-import { ThreadObj } from "./models.js";
+import { Thread } from "openai/src/resources/beta/index.js";
+import { FileObj, ThreadObj } from "./models.js";
 
 env.config();
 const openai = new OpenAI();
@@ -57,21 +56,21 @@ async function createQuizAssistant(): Promise<Assistant> {
   });
 }
 
-async function createThread(files: CommandInteractionOption[]): Promise<ThreadObj> {
+async function createThread(files: FileObj[]): Promise<ThreadObj> {
   const quizFiles = await Promise.all(
-    files.map(async ( { attachment } ) => {
-      if(attachment) { // Make sure attachment exists
-        const path = await downloadFile(attachment.url, attachment.name);
+    files.map(async (file) => {
+      if (file) {
+        const path = await downloadFile(file.url, file.name);
         return await openai.files.create({
           file: fs.createReadStream(path),
           purpose: "assistants",
         });
-      }else {
+      } else {
         return {} as FileObject;
       }
     })
   );
-  
+
   const attachments = quizFiles.map(
     (file): ThreadCreateParams.Message.Attachment => {
       return { file_id: file?.id, tools: [{ type: "file_search" }] };
@@ -101,14 +100,8 @@ async function createThread(files: CommandInteractionOption[]): Promise<ThreadOb
                 `,
   };
 
-  const userMessage: ThreadCreateParams.Message = {
-    role: "user",
-    content: "This is the user message: ",
-    attachments: attachments,
-  };
-
   const threadCreateParams: ThreadCreateParams = {
-    messages: [systemMessage, userMessage],
+    messages: [systemMessage],
   };
 
   const thread = await openai.beta.threads.create(threadCreateParams);
@@ -125,13 +118,12 @@ async function deleteFiles(fileIds: string[]): Promise<boolean> {
   );
 }
 
-async function generateQuiz(attachment: CommandInteractionOption[]): Promise<any> {
-  
-  let files: FileObject[] = [];
+async function generateQuiz(files: FileObj[]): Promise<any> {
+  let quizFiles: FileObject[] = [];
   try {
     const assistant = await createQuizAssistant();
-    const { thread, quizFiles } = await createThread(attachment);
-    files = quizFiles;
+    let thread: Thread;
+    ({ thread, quizFiles } = await createThread(files));
 
     const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
       assistant_id: assistant.id,
@@ -147,15 +139,13 @@ async function generateQuiz(attachment: CommandInteractionOption[]): Promise<any
       console.log(JSON.parse(text.value));
       return JSON.parse(text.value);
     }
-    return {status: "failed", Error: "No text content"};
+    return { status: "failed", Error: "No text content" };
   } catch (err) {
-    console.error("Error", err);
-    return {status: "failed", Error: "err"};
+    console.error("GenerateQuizError", err);
+    return { status: "failed", Error: "err" };
   } finally {
-    console.log("finally");
-    if (files.length > 0) {
-      const fileIds = files.map((file) => file.id);
-      console.log("deleting files", fileIds);
+    if (quizFiles.length > 0) {
+      const fileIds = quizFiles.map((file) => file.id);
       await deleteFiles(fileIds);
     }
   }
