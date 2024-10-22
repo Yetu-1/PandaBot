@@ -1,6 +1,7 @@
 import { CommandInteractionOption } from "discord.js";
 import { redpanda } from "../redpanda_config.js";
 import env from "dotenv"
+import { FileObj } from "../../services/models.js";
 
 env.config();
 
@@ -16,7 +17,7 @@ export async function connect() {
   }
 }
 
-export async function sendQuiz(files: CommandInteractionOption[], channelId: string, duration: number) {
+export async function sendQuiz(files: FileObj[], channelId: string, duration: number) {
   // Send message to the specified topic
   try {
     await producer.send({

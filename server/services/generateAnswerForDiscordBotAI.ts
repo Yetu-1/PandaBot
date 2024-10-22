@@ -16,7 +16,7 @@ async function generateAnswerForDiscordBotAI(
     };
   try {
     const systemPromptPath =
-      "/Users/nombaadmin/Documents/PandaBot/server/services/generateAIAnswerPrompt.txt";
+      "services/generateAIAnswerPrompt.txt";
     const systemPrompt = fs.readFileSync(systemPromptPath, "utf-8");
     const completion = await openai.chat.completions.create({
       messages: [
