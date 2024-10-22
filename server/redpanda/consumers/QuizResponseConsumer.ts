@@ -39,7 +39,7 @@ export async function init() {
       },
     });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error initializing end quiz consumer: ", error);
   }
 }
 
@@ -59,7 +59,7 @@ async function sendNextQuestion(lastAnswer: QuizUserAnswer) {
       }
       // console.log(resp);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error sending next question: ", error);
     }
 }
 
@@ -75,7 +75,7 @@ async function sendQuestion(question : any, userId: string) {
       await user.send(discordQuestion);
     }
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error sending question: ", error);
   }
 } 
 
@@ -101,7 +101,7 @@ async function sendStartQuizPrompt(quiz: QuizUserAnswer) {
     const user = await discord_client.users.fetch(quiz.user_id);
     await user.send(message);
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error sending start quiz prompt: ", error);
   }
 }
 
@@ -153,7 +153,7 @@ export async function sendUserAnswerReport(quiz_id: string, user_id: string) {
       }
     }
   }catch (error) {
-    console.error("Error:", error);
+    console.error("Error sending user answer report: ", error);
   }
 }
 
@@ -161,6 +161,6 @@ export async function disconnect() {
   try {
     await consumer.disconnect();
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error disconnecting quiz response consumer: ", error);
   }
 }

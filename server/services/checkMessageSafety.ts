@@ -29,7 +29,7 @@ export async function checkMsgSafety(msg: string) {
         const toxicity: number = response.data.attributeScores.TOXICITY.summaryScore.value;
         return toxicity * 100;
     }catch(err) {
-        console.log(err);
+        console.log( "Error: checking message safety", err);
     }
 
 }

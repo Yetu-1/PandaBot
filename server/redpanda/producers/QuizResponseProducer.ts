@@ -11,7 +11,7 @@ export async function connect() {
   try {
     await producer.connect();
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error connection quiz response producer: ", error);
   }
 }
 
@@ -23,7 +23,7 @@ export async function sendUserResponse(answer: object) {
       messages: [{ value: JSON.stringify({ answer }) }]
     });
   }catch (error) {
-    console.error("Error:", error);
+    console.error("Error sending user response to repanda broker: ", error);
   }
 }
 
@@ -32,6 +32,6 @@ export async function disconnect() {
     // Disconnet producer from redpanda broker
     await producer.disconnect();
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error disconnectin quiz response producer: ", error);
   } 
 }

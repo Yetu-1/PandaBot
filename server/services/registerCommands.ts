@@ -47,7 +47,7 @@ export async function registerCommands() : Promise<boolean> {
         console.log("Slash commands were registerd successfully")
         return true;
     } catch (error) {
-        console.error("Error: ", error);
+        console.error("Error registering commands: ", error);
         return false;
     }
 }
