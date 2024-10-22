@@ -4,8 +4,7 @@ import env from "dotenv";
 env.config();
 
 const token = process.env.DISCORD_TOKEN!;
-const bot_id = process.env.BOT_ID!;
-const guild_id = process.env.GUILD_ID!;
+const bot_id = process.env.DISCORD_BOT_ID!;
 
 const rest = new REST({ version: "10" }).setToken(token);
 
@@ -48,7 +47,7 @@ const commands = [
 ];
 
 // TODO: register when bot is added to server
-export async function registerCommands(): Promise<boolean> {
+export async function registerCommands(guild_id : string): Promise<boolean> {
   try {
     await rest.put(Routes.applicationGuildCommands(bot_id, guild_id), {
       body: commands,

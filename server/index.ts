@@ -79,7 +79,7 @@ async function setupServer() {
     await EndQuizConsumer.init();
     // Login discord bot
     discord_client.login(process.env.DISCORD_TOKEN);
-    registerCommands();
+    //registerCommands();
   } catch (error) {
     console.error("InitializeError:", error);
   }
@@ -125,6 +125,16 @@ setupServer();
 
 discord_client.on("ready", () => {
   console.log("Bot is online!");
+});
+
+discord_client.on("guildCreate", async (guild) => {
+  try{
+    console.log(`Guild ${guild.id} has added pandabot`)
+    // register guild 
+    await registerCommands(guild.id);
+  }catch(error) {
+    console.error("Error registering commands on guid create: ", error);
+  }
 });
 
 discord_client.on("messageCreate", async (message) => {
