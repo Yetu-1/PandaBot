@@ -13,12 +13,18 @@ export async function sendQuizRequest(interaction: ChatInputCommandInteraction) 
             type: 10,
             value: 0,
         };
+        const num_of_questions = interaction.options.get("number-of-questions") || {
+          name: "number-of-questions",
+          type: 10,
+          value: 0,
+      };;
+        
         const time = duration.value as number;
         interaction.reply(
         `The quiz is about to start. Duration: ${duration.value} minutes!`
         );
         // send quiz to quiz generation consumer to generate, store and start quiz
-        await QuizDBProducer.sendQuiz(files, interaction.channelId, time);
+        await QuizDBProducer.sendQuiz(files, interaction.channelId, time, num_of_questions.value as number);
     }catch(error) {
         console.error("Error sending quiz request: ", error)
     }
