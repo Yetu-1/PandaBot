@@ -116,7 +116,7 @@ export async function sendUserAnswerReport(quiz_id: string, user_id: string) {
     const user_answers = await getUserAnswers(quiz_id, user_id);
     if(questions != 'NONE' && questions != "Error") {
       // create embeds for the report
-      const embeds = createEmbeds(questions);
+      const embeds = createEmbeds(questions, user_answers);
       const report = {
         embeds: embeds
       };

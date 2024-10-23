@@ -67,7 +67,7 @@ async function createQuizAssistant(): Promise<Assistant> {
   });
 }
 
-async function createThread(files: FileObj[]): Promise<ThreadObj> {
+async function createThread(files: FileObj[], question_count : number): Promise<ThreadObj> {
   const localFilesPath : string[] = []
   const quizFiles = await Promise.all(
     files.map(async ( file ) => {
@@ -100,7 +100,7 @@ async function createThread(files: FileObj[]): Promise<ThreadObj> {
     content: `
             You are a helpful assistant that generates multiple-choice quizzes. Follow these strict rules:
 
-            Generate exactly 5 questions.
+            Generate exactly ${question_count} questions.
             Provide 4 answer options for each question.
             Only use the format below, with no extra words, code blocks, or explanations.
 
@@ -154,12 +154,12 @@ async function deleteFiles(fileIds: string[]): Promise<boolean> {
   );
 }
 
-async function generateQuiz(attachment: FileObj[]): Promise<any> {
+async function generateQuiz(attachment: FileObj[], question_count: number): Promise<any> {
   
   let files: FileObject[] = [];
   try {
     const assistant = await createQuizAssistant();
-    const { thread, quizFiles } = await createThread(attachment);
+    const { thread, quizFiles } = await createThread(attachment, question_count);
     files = quizFiles;
 
     const run = await openai.beta.threads.runs.createAndPoll(thread.id, {

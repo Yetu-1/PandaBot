@@ -17,12 +17,12 @@ export async function connect() {
   }
 }
 
-export async function sendQuiz(files: FileObj[], channelId: string, duration: number) {
+export async function sendQuiz(files: FileObj[], channelId: string, duration: number, question_count: number) {
   // Send message to the specified topic
   try {
     await producer.send({
       topic: topic,
-      messages: [{ value: JSON.stringify({ files, channelId, duration }) }]
+      messages: [{ value: JSON.stringify({ files, channelId, duration, question_count }) }]
     });
   }catch (error) {
     console.error("Error sending quiz to repanda broker: ", error);
