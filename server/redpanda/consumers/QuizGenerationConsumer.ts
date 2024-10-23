@@ -26,12 +26,85 @@ export async function init() {
         const messageObject = JSON.parse(message.value?.toString() || "{}");
         console.log(messageObject);
         // Generate quiz
-        const quiz = await generateQuiz(messageObject.files);
+        //const quiz = await generateQuiz(messageObject.files);
+        const quiz = {
+        status: 'success',
+        title: 'Color Theory Quiz',
+        id: 'e818fe5d-27a6-48f0-ae74-3224f16e9ac3',
+        channelId: '',
+        questions: [
+          {
+            question: 'Which of the following color pairs are considered complementary in the RGB color model?',
+            options: [ 'Red-Green', 'Green-Magenta', 'Blue-Orange', 'Yellow-Purple' ],
+            answer: '2'
+          },
+          {
+            question: 'According to the RYB color model, blue is complementary to which color?',
+            options: [ 'Orange', 'Yellow', 'Green', 'Red' ],
+            answer: '1'
+          },
+          {
+            question: 'What is produced when complementary colors are combined?',
+            options:  [
+              'A new color',
+              'A vibrant pattern',
+              'A grayscale color',
+              'A warm tone'
+            ],
+            answer: '3'
+          },
+          {
+            question: 'Which theory suggests that red-green and blue-yellow are the most contrasting pairs?',
+            options: [
+              'RGB Color Model',
+              'CMY Subtractive Model',
+              'Opponent Process Theory',
+              'RYB Color Model'
+            ],
+            answer: '3'
+          },
+          {
+            question: 'What is a common pair of complementary colors in all color theories?',
+            options: [ 'Red-Green', 'Blue-Yellow', 'Black-White', 'Purple-Orange' ],
+            answer: '3'
+          },
+          {
+            question: 'Which of the following color pairs are considered complementary in the RGB color model?',
+            options: [ 'Red-Green', 'Green-Magenta', 'Blue-Orange', 'Yellow-Purple' ],
+            answer: '2'
+          },
+          {
+            question: 'According to the RYB color model, blue is complementary to which color?',
+            options: [ 'Orange', 'Yellow', 'Green', 'Red' ],
+            answer: '1'
+          },
+          {
+            question: 'What is produced when complementary colors are combined?',
+            options:  [
+              'A new color',
+              'A vibrant pattern',
+              'A grayscale color',
+              'A warm tone'
+            ],
+            answer: '3'
+          },
+          {
+            question: 'Which theory suggests that red-green and blue-yellow are the most contrasting pairs?',
+            options: [
+              'RGB Color Model',
+              'CMY Subtractive Model',
+              'Opponent Process Theory',
+              'RYB Color Model'
+            ],
+            answer: '3'
+          }
+        ]};
+
         if(quiz.status == 'success') {
           // save quiz into database
-          const quiz_id = await saveQuiz(quiz, messageObject.channelId);
+          const quiz_id = await saveQuiz(quiz as Quiz, messageObject.channelId);
           // send participate button to discord channel
-          await sendParticpateButton(quiz, quiz_id, messageObject.channelId);
+          await sendParticpateButton(quiz as Quiz, quiz_id, messageObject.channelId);
           // Start timer
           let delay = 1000 * 60; // minutes to milliseconds
           delay = delay * messageObject.duration;

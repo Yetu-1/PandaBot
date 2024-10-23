@@ -111,41 +111,11 @@ export async function sendUserAnswerReport(quiz_id: string, user_id: string) {
     const questions = await getQuestions(quiz_id);
     // Get all the user's answers
     const user_answers = await getUserAnswers(quiz_id, user_id);
-    console.log(user_answers);
     if(questions != 'NONE' && questions != "Error") {
-      let report_content = questions.map( (question : any) => {
-        return (
-          `(${question.number}) ${question.question}\n` + 
-          question.options.map((option : string, index:number) => {
-            const opt_text = ` (${index+1}) ${option} `;
-            const user_answer = user_answers.filter((answer : any) => question.number == answer.number); // get user answer for the question
-            let suffix = ''
-            if(index+1 == question.answer ) 
-              suffix = '✅';
-            else if(index+1 == user_answer[0].answer && index+1 != question.answer)
-              suffix = '❌';
-            return ( opt_text + suffix)
-          })
-          .join('\n')
-        )
-      }).join('\n\n\n')
-      
-      report_content = `\`\`\`\n${report_content}\n\`\`\`` // put the report in a code block
-      // construct message
-      // Create button row for each answer
-      const embed = new EmbedBuilder()
-      .setColor(0x3498db)
-      .setTitle("Thats a wrap!")
-      .setDescription('Time to see how you did.')
-      .addFields(
-          {
-              name: 'Review Questions and Answers:',
-              value: report_content
-          }
-      )
-
+      // create embeds for the report
+      const embeds = createEmbeds(questions, user_answers);
       const report = {
-      embeds: [embed]
+        embeds: embeds
       };
       const user = await discord_client.users.fetch(user_id);
       if (user) {
@@ -155,6 +125,63 @@ export async function sendUserAnswerReport(quiz_id: string, user_id: string) {
   }catch (error) {
     console.error("Error sending user answer report: ", error);
   }
+}
+
+function createEmbeds(questions : any[], user_answers : any[]) : EmbedBuilder[] {
+  const length = questions.length;
+  const total_no_of_embeds = Math.ceil(length / 20);  // round up
+  // console.log("Total no of Embeds: ", total_no_of_embeds);
+  let total_no_of_fields = Math.ceil(length / 4); 
+  // console.log("Total no of Fields: ", total_no_of_fields);
+  let pointer : number = 0;
+
+  let embeds : EmbedBuilder[] = [];
+  const heading = new EmbedBuilder()
+  .setColor(0x3498db)
+  .setTitle("Thats a wrap!")
+  .setDescription('Time to see how you did.\n\n**Review Questions**')
+  embeds.push(heading);
+
+  for(let i = 0; i < total_no_of_embeds; i++) {
+    const embed = new EmbedBuilder();
+    for(let j = 0; j < 5 && total_no_of_fields > 0; j++) {
+      // Slice the array into a subarray of a set of 4 questions and add them to a field
+      let curr_set : string = questions.slice(pointer, pointer+4).map((question : any, index : number) => {
+        const question_number = pointer + index + 1;
+        return (
+          `(${question_number}) ${question.question}\n` + 
+          question.options.map((option : string, index:number) => {
+            const opt_text = ` (${index+1}) ${option} `;
+            // filter the array for the user's answer that corresponds to the current question
+            const user_answer = user_answers.filter((answer : any) => (question_number) == answer.number);
+            let suffix = ''
+            // check if the current option is the correct answer and add the check to indicate that
+            if(index+1 == question.answer ) 
+              suffix = '✅';
+            else if(index+1 == user_answer[0].answer && index+1 != question.answer) // if the current option is the user's answer and also the current option
+              suffix = '❌';
+            return ( opt_text + suffix)
+          })
+          .join('\n')
+        )
+      }).join('\n\n\n')
+
+      curr_set = `\`\`\`\n${curr_set}\n\`\`\`` // put the current set of questions in a code block
+      // add field containing 4 questions to the embed
+      embed.addFields(
+        {
+            name: "...",
+            value: curr_set
+        }
+      )
+      pointer += 4;
+      total_no_of_fields--;
+    }
+    // add the embed to the list of embeds
+    embeds.push(embed);
+  }
+
+  return embeds;
 }
 
 export async function disconnect() {

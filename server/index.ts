@@ -11,6 +11,7 @@ import { FileObj } from "./services/models.js";
 import { registerCommands } from "./services/registerCommands.js";
 import { sendUserResponse } from "./services/sendUserResponse.js";
 import { sendQuizRequest } from "./services/sendQuizRequest.js";
+import { sendUserAnswerReport } from "./redpanda/consumers/QuizResponseConsumer.js";
 
 async function setupServer() {
   try {
@@ -26,8 +27,9 @@ async function setupServer() {
 
 setupServer();
 
-discord_client.on("ready", () => {
+discord_client.on("ready", async() => {
   console.log("Bot is online!");
+  await sendUserAnswerReport("322b7b71-8e43-4a54-9728-ec6610d1ec50", "1254360980994003029");
 });
 
 discord_client.on("guildCreate", async (guild) => {
