@@ -12,6 +12,9 @@ const groupId = process.env.QUIZ_GROUP_ID || "default-groupy";
 const topic = process.env.QUIZ_RESPONSE_TOPIC || "default-topic";
 
 const consumer = redpanda.consumer({ groupId });
+const fileds_per_embed = 3;
+const questions_per_embed = 9;
+const questions_per_field = 3;
 
 export async function init() {
   try {
@@ -113,7 +116,7 @@ export async function sendUserAnswerReport(quiz_id: string, user_id: string) {
     const user_answers = await getUserAnswers(quiz_id, user_id);
     if(questions != 'NONE' && questions != "Error") {
       // create embeds for the report
-      const embeds = createEmbeds(questions, user_answers);
+      const embeds = createEmbeds(questions);
       const report = {
         embeds: embeds
       };
@@ -127,14 +130,13 @@ export async function sendUserAnswerReport(quiz_id: string, user_id: string) {
   }
 }
 
-function createEmbeds(questions : any[], user_answers : any[]) : EmbedBuilder[] {
+function createEmbeds(questions : any[], user_answers? : any[]) : EmbedBuilder[] {
   const length = questions.length;
-  const total_no_of_embeds = Math.ceil(length / 20);  // round up
+  const total_no_of_embeds = Math.ceil(length / questions_per_embed);  // round up
   // console.log("Total no of Embeds: ", total_no_of_embeds);
-  let total_no_of_fields = Math.ceil(length / 4); 
+  let total_no_of_fields = Math.ceil(length / questions_per_field); 
   // console.log("Total no of Fields: ", total_no_of_fields);
-  let pointer : number = 0;
-
+  let current_question : number = 0;
   let embeds : EmbedBuilder[] = [];
   const heading = new EmbedBuilder()
   .setColor(0x3498db)
@@ -144,27 +146,37 @@ function createEmbeds(questions : any[], user_answers : any[]) : EmbedBuilder[] 
 
   for(let i = 0; i < total_no_of_embeds; i++) {
     const embed = new EmbedBuilder();
-    for(let j = 0; j < 5 && total_no_of_fields > 0; j++) {
+    for(let j = 0; j < fileds_per_embed && total_no_of_fields > 0; j++) {
       // Slice the array into a subarray of a set of 4 questions and add them to a field
-      let curr_set : string = questions.slice(pointer, pointer+4).map((question : any, index : number) => {
-        const question_number = pointer + index + 1;
+      let curr_set : string = questions.slice(current_question, current_question+questions_per_field).map((question : any, index : number) => {
+        const question_number = current_question + index + 1;
+        let answer = '';
         return (
           `(${question_number}) ${question.question}\n` + 
           question.options.map((option : string, index:number) => {
             const opt_text = ` (${index+1}) ${option} `;
-            // filter the array for the user's answer that corresponds to the current question
-            const user_answer = user_answers.filter((answer : any) => (question_number) == answer.number);
-            let suffix = ''
-            // check if the current option is the correct answer and add the check to indicate that
-            if(index+1 == question.answer ) 
-              suffix = '✅';
-            else if(index+1 == user_answer[0].answer && index+1 != question.answer) // if the current option is the user's answer and also the current option
-              suffix = '❌';
-            return ( opt_text + suffix)
+            if(user_answers) {
+              // filter the array for the user's answer that corresponds to the current question
+              const user_answer = user_answers.filter((answer : any) => (question_number) == answer.number);
+              let suffix = ''
+              // check if the current option is the correct answer and add the check to indicate that
+              if(index+1 == question.answer )
+                suffix = '✅';
+              
+              else if(index+1 == user_answer[0].answer && index+1 != question.answer) // if the current option is the user's answer and also the current option
+                suffix = '❌';
+              return ( opt_text + suffix)
+            }else {
+              if(index+1 == question.answer )
+                answer = option;
+
+              return opt_text;
+            }
           })
           .join('\n')
+          + `${(user_answers)? "" : `\n\nAns: ${answer}`}`
         )
-      }).join('\n\n\n')
+      }).join('\n\n')
 
       curr_set = `\`\`\`\n${curr_set}\n\`\`\`` // put the current set of questions in a code block
       // add field containing 4 questions to the embed
@@ -174,7 +186,7 @@ function createEmbeds(questions : any[], user_answers : any[]) : EmbedBuilder[] 
             value: curr_set
         }
       )
-      pointer += 4;
+      current_question += questions_per_field;
       total_no_of_fields--;
     }
     // add the embed to the list of embeds

@@ -29,7 +29,7 @@ setupServer();
 
 discord_client.on("ready", async() => {
   console.log("Bot is online!");
-  await sendUserAnswerReport("322b7b71-8e43-4a54-9728-ec6610d1ec50", "1254360980994003029");
+  await sendUserAnswerReport("3d4078d1-a879-4acb-be81-e557df7cc5cc", "1254360980994003029");
 });
 
 discord_client.on("guildCreate", async (guild) => {
