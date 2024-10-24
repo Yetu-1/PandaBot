@@ -1,17 +1,22 @@
-import {
-  ChatInputCommandInteraction,
-  CommandInteractionOption,
-  Message
-} from "discord.js";
 import { discord_client } from "./services/config.js";
 import { setupRedpanda, disconnectRedpanda } from "./redpanda/redpandaManager.js";
-
 import generateAnswerForDiscordBotAI from "./services/generateAnswerForDiscordBotAI.js";
-import { FileObj } from "./services/models.js";
 import { registerCommands } from "./services/registerCommands.js";
 import { sendUserResponse } from "./services/sendUserResponse.js";
 import { sendQuizRequest } from "./services/sendQuizRequest.js";
-import { sendUserAnswerReport } from "./redpanda/consumers/QuizResponseConsumer.js";
+import express from "express"
+
+const app = express();
+const port = 3000;
+
+app.use(express.static("public"));
+app.get("/", (req, res) => {
+    res.sendFile("./index.html");
+});
+
+app.listen(port, () => {
+  console.log(`Listening on port ${port}`);
+})
 
 async function setupServer() {
   try {

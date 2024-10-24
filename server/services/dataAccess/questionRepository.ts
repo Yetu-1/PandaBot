@@ -1,5 +1,4 @@
 import { db } from "./quizRepository.js";
-import { v4 as uuidv4 } from 'uuid';
 import { QuizQuestion } from "../models.js";
 
 export async function storeQuestions(quizQuestions: QuizQuestion[], quiz_id: string): Promise<boolean>{
