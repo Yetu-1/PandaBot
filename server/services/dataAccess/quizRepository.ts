@@ -6,12 +6,16 @@ import { Quiz, QuizEntry } from "../models.js";
 
 env.config();
 
+const isProduction =  process.env.NODE_ENV === 'production';
+
+
 export const db = new pg.Client({
-    user: process.env.PG_USER,
-    host: process.env.PG_HOST,
-    database: process.env.PG_DATABASE,
-    password: process.env.PG_PASSWORD,
-    port: Number(process.env.PG_PORT) ,
+    connectionString: isProduction? process.env.DATABASE_URL : undefined, 
+    user: isProduction? '' : process.env.PG_USER,
+    host: isProduction? '' : process.env.PG_HOST,
+    database: isProduction? '' : process.env.PG_DATABASE,
+    password: isProduction? '' : process.env.PG_PASSWORD,
+    port: isProduction? 0 : Number(process.env.PG_PORT) ,
 });
 
 db.connect();
