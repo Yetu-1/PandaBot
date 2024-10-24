@@ -5,7 +5,7 @@ import { getAnswers } from "./questionRepository.js";
 
 export async function storeScore(score: Score) : Promise<boolean>{
     try{
-        await db.query("INSERT INTO score (user_id, username, quiz_id, score) VALUES ($1, $2, $3, $4)", 
+        await db.query('INSERT INTO "QuizScores" (user_id, username, quiz_id, score) VALUES ($1, $2, $3, $4)', 
             [score.user_id, score.username, score.quiz_id, score.value] );
         return true;
     }catch(err) {
@@ -52,7 +52,7 @@ function calcUserScore(answers : Answer[], user_answers: Answer[]) {
 
 export async function getScores(quiz_id : string) {
     try{
-        const resp = await db.query("SELECT * FROM score WHERE quiz_id=$1", 
+        const resp = await db.query('SELECT * FROM "QuizScores" WHERE quiz_id=$1', 
             [quiz_id] );
         if(resp.rows.length > 0) {
             return resp.rows;
