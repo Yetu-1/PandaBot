@@ -40,7 +40,7 @@ export async function saveQuiz(quiz: Quiz, channel_id: string) : Promise<string>
 
 async function createQuizEntry(quiz: QuizEntry): Promise<boolean>{
     try {
-        await db.query("INSERT INTO quiz (quiz_id, quiz_title, channel_id) VALUES ($1, $2, $3)", [quiz.id, quiz.title, quiz.channel_id])
+        await db.query('INSERT INTO "Quizzes" (id, title, channel_id) VALUES ($1, $2, $3)', [quiz.id, quiz.title, quiz.channel_id])
         return true;
     }catch (err) {
         console.error("Error storing quiz: ", err);
@@ -50,7 +50,7 @@ async function createQuizEntry(quiz: QuizEntry): Promise<boolean>{
 
 export async function getQuiz(quiz_id: string) : Promise<any> {
     try {
-        const resp = await db.query("SELECT * FROM quiz WHERE quiz_id=$1", [quiz_id])
+        const resp = await db.query('SELECT * FROM "Quizzes" WHERE id=$1', [quiz_id])
         if(resp.rows.length > 0) {
             return resp.rows[0];
         }else {
@@ -64,7 +64,7 @@ export async function getQuiz(quiz_id: string) : Promise<any> {
 
 export async function getQuizStatus(quiz_id : string) {
     try {
-        const resp = await db.query("SELECT status FROM quiz WHERE quiz_id=$1", [quiz_id])
+        const resp = await db.query('SELECT status FROM "Quizzes" WHERE id=$1', [quiz_id])
         if(resp.rows.length > 0) {
             return resp.rows[0];
         }else {
@@ -78,7 +78,7 @@ export async function getQuizStatus(quiz_id : string) {
 
 export async function setQuizStatus(quiz_id : string, status : string ) {
     try {
-        await db.query("UPDATE quiz SET status=$1 WHERE quiz_id=$2", [status, quiz_id])
+        await db.query('UPDATE "Quizzes" SET status=$1 WHERE id=$2', [status, quiz_id])
         return true;
     }catch (err) {
         console.error("Error setting quiz status: ", err);
