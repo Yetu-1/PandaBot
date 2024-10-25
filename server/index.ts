@@ -5,13 +5,14 @@ import { registerCommands } from "./services/registerCommands.js";
 import { sendUserResponse } from "./services/sendUserResponse.js";
 import { sendQuizRequest } from "./services/sendQuizRequest.js";
 import express from "express"
+import * as MessageProducer from "./redpanda/producers/DiscordMsgProducer.js";
 
 const app = express();
 const port = 3000;
 
 app.use(express.static("public"));
 app.get("/", (req, res) => {
-    res.sendFile("./index.html");
+    res.sendFile("index.html");
 });
 
 app.listen(port, () => {
@@ -49,6 +50,10 @@ discord_client.on("guildCreate", async (guild) => {
 discord_client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   try {
+    if(!message?.author.bot) {
+      // send discord message to redpanda broker
+      await MessageProducer.sendMessage(message);
+    }
   } catch (error) {
     console.error("onMessageCreateError:", error);
   }

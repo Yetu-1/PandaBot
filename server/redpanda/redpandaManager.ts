@@ -21,12 +21,12 @@ export async function setupRedpanda() {
         const quiz_db_topic = process.env.QUIZ_DB_TOPIC || "default-topic";
         await Admin.createTopic([quiz_topic, quiz_db_topic]);
         // Connect producers to repanda broker
-        // await MessageProducer.connect();
+        await MessageProducer.connect();
         await QuizProducer.connect();
         await QuizDBProducer.connect();
         await EndQuizProducer.connect();
         // Initialize consumners to repanda broker and subscribe to specified topic to consume messages
-        // await MessageConsumer.init();
+        await MessageConsumer.init();
         await QuizConsumer.init();
         await QuizDBConsumer.init();
         await EndQuizConsumer.init();
