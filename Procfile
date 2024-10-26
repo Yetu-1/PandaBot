@@ -1,2 +1,2 @@
-web: npm start --prefix server
+web: npm run start --prefix server
 worker: npm run start:bot --prefix server
