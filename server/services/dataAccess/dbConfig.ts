@@ -12,6 +12,9 @@ export const db = new pg.Client({
     database: isProduction? '' : process.env.PG_DATABASE,
     password: isProduction? '' : process.env.PG_PASSWORD,
     port: isProduction? 0 : Number(process.env.PG_PORT) ,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 db.connect();
