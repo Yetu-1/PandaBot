@@ -52,7 +52,7 @@ function calcUserScore(answers : Answer[], user_answers: Answer[]) {
 
 export async function getScores(quiz_id : string) {
     try{
-        const resp = await db.query('SELECT * FROM "QuizScores" WHERE quiz_id=$1', 
+        const resp = await db.query('SELECT * FROM "QuizScores" WHERE quiz_id=$1 ORDER BY score DESC', 
             [quiz_id] );
         if(resp.rows.length > 0) {
             return resp.rows;
