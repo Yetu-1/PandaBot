@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "npm install --production && rimraf dist && npx tsc",
+    "build": "npm install --omit=dev && rimraf dist && npx tsc",
     "prestart": "npm run build",
     "start": "node dist/index.js",
     "start:bot": "node dist/bot.js",
