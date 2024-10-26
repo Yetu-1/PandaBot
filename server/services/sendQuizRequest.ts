@@ -1,30 +1,32 @@
 import { ChatInputCommandInteraction, CommandInteractionOption } from "discord.js";
-import * as QuizDBProducer from "../redpanda/producers/QuizRequestProducer.js";
+// import * as QuizDBProducer from "../redpanda/producers/QuizRequestProducer.js";
 import { FileObj } from "./models.js";
 
 export async function sendQuizRequest(interaction: ChatInputCommandInteraction) {
   console.log(interaction.options.get("file1"));
     try {
-        // get files from command
-        const files : FileObj[] = getFilesFromChatCommandInteraction(interaction);
-        // Get duration
-        const duration = interaction.options.get("duration") || {
-            name: "duration",
-            type: 10,
-            value: 0,
-        };
-        const num_of_questions = interaction.options.get("number-of-questions") || {
-          name: "number-of-questions",
-          type: 10,
-          value: 0,
-      };;
-        
-        const time = duration.value as number;
-        interaction.reply(
+      // get files from command
+      const files: FileObj[] = getFilesFromChatCommandInteraction(interaction);
+      // Get duration
+      const duration = interaction.options.get("duration") || {
+        name: "duration",
+        type: 10,
+        value: 0,
+      };
+      const num_of_questions = interaction.options.get(
+        "number-of-questions"
+      ) || {
+        name: "number-of-questions",
+        type: 10,
+        value: 0,
+      };
+
+      const time = duration.value as number;
+      interaction.reply(
         `The quiz is about to start. Duration: ${duration.value} minutes!`
-        );
-        // send quiz to quiz generation consumer to generate, store and start quiz
-        await QuizDBProducer.sendQuiz(files, interaction.channelId, time, num_of_questions.value as number);
+      );
+      // send quiz to quiz generation consumer to generate, store and start quiz
+      // await QuizDBProducer.sendQuiz(files, interaction.channelId, time, num_of_questions.value as number);
     }catch(error) {
         console.error("Error sending quiz request: ", error)
     }
