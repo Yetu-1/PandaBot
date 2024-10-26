@@ -1,1 +1,6 @@
-{}
+{
+    "scripts": {
+      "heroku-postbuild": "npm run build --prefix server"
+    }
+  }
+  
