@@ -8,7 +8,7 @@ import { createQuizMessage } from "../../services/createDiscordQuestion.js";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, getUserAgentAppendix } from "discord.js";
 env.config();
 
-const groupId = process.env.QUIZ_GROUP_ID || "default-groupy";
+const groupId = process.env.QUIZ_RESPONSE_GROUP || "default-groupy";
 const topic = process.env.QUIZ_RESPONSE_TOPIC || "default-topic";
 
 const consumer = redpanda.consumer({ groupId });

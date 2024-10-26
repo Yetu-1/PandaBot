@@ -19,7 +19,9 @@ export async function setupRedpanda() {
         // const msg_topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
         const quiz_topic = process.env.QUIZ_RESPONSE_TOPIC || "default-topic";
         const quiz_db_topic = process.env.QUIZ_DB_TOPIC || "default-topic";
-        await Admin.createTopic([quiz_topic, quiz_db_topic]);
+        const discord_msg_topic = process.env.DISCORD_MESSAGES_TOPIC || "default-topic";
+        const end_quiz_topic = process.env.END_QUIZ_TOPIC || "default-topic";
+        await Admin.createTopic([quiz_topic, quiz_db_topic, discord_msg_topic, end_quiz_topic]);
         // Connect producers to repanda broker
         await MessageProducer.connect();
         await QuizProducer.connect();
@@ -30,6 +32,7 @@ export async function setupRedpanda() {
         await QuizConsumer.init();
         await QuizDBConsumer.init();
         await EndQuizConsumer.init();
+        console.log("All redpanda resources connected!")
     }catch(error) {
         console.error("Error setting up redpanda: ", error);
     }
