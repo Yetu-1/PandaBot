@@ -1,17 +1,17 @@
 import { discord_client } from "./services/config.js";
-import { setupRedpanda, disconnectRedpanda } from "./redpanda/redpandaManager.js";
+// import { setupRedpanda, disconnectRedpanda } from "./redpanda/redpandaManager.js";
 import generateAnswerForDiscordBotAI from "./services/generateAnswerForDiscordBotAI.js";
 import { registerCommands } from "./services/registerCommands.js";
-import { sendUserResponse } from "./services/sendUserResponse.js";
 import { sendQuizRequest } from "./services/sendQuizRequest.js";
-import * as MessageProducer from "./redpanda/producers/DiscordMsgProducer.js";
+import { sendUserResponse } from "./services/sendUserResponse.js";
+// import * as MessageProducer from "./redpanda/producers/DiscordMsgProducer.js";
 
 
 
 async function setupServer() {
   try {
     // setup redpanda producers and consumers
-    await setupRedpanda();
+    // await setupRedpanda();
     // Login discord bot
     discord_client.login(process.env.DISCORD_TOKEN);
     //registerCommands();
@@ -41,7 +41,7 @@ discord_client.on("messageCreate", async (message) => {
   try {
     if(!message?.author.bot) {
       // send discord message to redpanda broker
-      await MessageProducer.sendMessage(message);
+      // await MessageProducer.sendMessage(message);
     }
   } catch (error) {
     console.error("onMessageCreateError:", error);
@@ -77,7 +77,7 @@ process.on("SIGINT", async () => {
   console.log("Closing app...");
   try {
     // Disconnect producers and consumers from repanda broker
-    await disconnectRedpanda();
+    // await disconnectRedpanda();
   } catch (err) {
     console.error("Error during cleanup:", err);
     process.exit(1);
