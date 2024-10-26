@@ -2,8 +2,6 @@ import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle } from 
 import { QuizUserAnswer } from "./models.js";
 
 import * as QuizProducer from "../redpanda/producers/QuizResponseProducer.js";
-import * as QuizConsumer from "../redpanda/consumers/QuizResponseConsumer.js";
-import { discord_client } from "./config.js";
 
 export async function sendUserResponse(interaction:  ButtonInteraction) {
     const params = interaction.customId.split(':');
