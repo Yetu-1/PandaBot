@@ -1,7 +1,7 @@
 import { ButtonInteraction } from "discord.js";
 import { QuizUserAnswer } from "./models.js";
 
-// import * as QuizProducer from "../redpanda/producers/QuizResponseProducer.js";
+import * as QuizProducer from "../redpanda/producers/QuizResponseProducer.js";
 
 export async function sendUserResponse(interaction: ButtonInteraction) {
   const params = interaction.customId.split(":");
@@ -29,7 +29,7 @@ export async function sendUserResponse(interaction: ButtonInteraction) {
       answer: "",
       type: params[2],
     };
-    // await QuizProducer.sendUserResponse(user_response);
+    await QuizProducer.sendUserResponse(user_response);
   } else {
     // Delete message
     const message = await interaction.channel?.messages.fetch(
@@ -45,6 +45,6 @@ export async function sendUserResponse(interaction: ButtonInteraction) {
       answer: params[3],
       type: "answer",
     };
-    // await QuizProducer.sendUserResponse(user_response);
+    await QuizProducer.sendUserResponse(user_response);
   }
 }

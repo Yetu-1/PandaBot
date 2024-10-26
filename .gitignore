@@ -134,5 +134,3 @@ dist
 **/Thumbs.db
 .DS_Store
 Thumbs.db
-
-server/redpanda

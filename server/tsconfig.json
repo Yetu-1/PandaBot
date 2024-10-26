@@ -12,7 +12,6 @@
         "**/*.ts"
     ], // Include all TypeScript files in all directories
     "exclude": [
-        "redpanda",
         "node_modules",
         "**/*.spec.ts"
     ] // Exclude node_modules and test files

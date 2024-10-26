@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, CommandInteractionOption } from "discord.js";
-// import * as QuizDBProducer from "../redpanda/producers/QuizRequestProducer.js";
+import * as QuizDBProducer from "../redpanda/producers/QuizRequestProducer.js";
 import { FileObj } from "./models.js";
 
 export async function sendQuizRequest(interaction: ChatInputCommandInteraction) {
@@ -26,7 +26,12 @@ export async function sendQuizRequest(interaction: ChatInputCommandInteraction) 
         `The quiz is about to start. Duration: ${duration.value} minutes!`
       );
       // send quiz to quiz generation consumer to generate, store and start quiz
-      // await QuizDBProducer.sendQuiz(files, interaction.channelId, time, num_of_questions.value as number);
+      await QuizDBProducer.sendQuiz(
+        files,
+        interaction.channelId,
+        time,
+        num_of_questions.value as number
+      );
     }catch(error) {
         console.error("Error sending quiz request: ", error)
     }
