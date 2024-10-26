@@ -1,6 +1,6 @@
 {
     "scripts": {
-      "heroku-postbuild": "cd server && npm install && npm run build"
+      "heroku-postbuild": "npm run build --prefix server"
     }
   }
   
