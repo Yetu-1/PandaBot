@@ -1,4 +1,4 @@
-import { db } from "./quizRepository.js";
+import { db } from "./dbConfig.js";
 import { Answer, Score } from "../models.js";
 import { getQuizParticipants, getUserAnswers } from "./userAnswerRepository.js";
 import { getAnswers } from "./questionRepository.js";

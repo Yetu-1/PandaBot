@@ -1,5 +1,5 @@
 import { QuizUserAnswer } from "../models.js";
-import { db } from "./quizRepository.js";
+import { db } from "./dbConfig.js";
 
 export async function storeUserAnswer(user_answer: QuizUserAnswer): Promise<boolean> {
     try{
