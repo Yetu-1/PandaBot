@@ -35,6 +35,5 @@
     "@types/uuid": "^10.0.0",
     "sequelize": "^6.37.4",
     "sequelize-cli": "^6.6.2"
-  },
-  "devDependencies": {}
+  }
 }
