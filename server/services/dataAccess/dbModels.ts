@@ -45,7 +45,7 @@ export const DiscordAIMessage = sequelize.define("discord_ai_message", {
     allowNull: false,
   },
   conversationId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: false,
   },
 });
