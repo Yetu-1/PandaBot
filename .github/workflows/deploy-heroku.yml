@@ -1,12 +1,4 @@
-name: Deploy to Heroku
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
+deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,12 +17,14 @@ jobs:
       run: npm run build --prefix server
       
     - name: Login to Heroku
-      run: |
-        echo $HEROKU_API_KEY | heroku auth:token
-        heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: heroku auth:token
+
+    - name: Set Heroku remote
+      run: heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
 
     - name: Deploy to Heroku
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      run: |
-        git push heroku main
+      run: git push heroku main
