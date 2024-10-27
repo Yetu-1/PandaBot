@@ -30,7 +30,7 @@ jobs:
       run: heroku auth:token
 
     - name: Set Heroku remote
-      run: heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
+      run: heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }} --auth-token ${{ secrets.HEROKU_API_KEY }}
     
     - name: Test Heroku remote
       run: git remote -v
