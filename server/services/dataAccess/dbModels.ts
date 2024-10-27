@@ -58,7 +58,7 @@ DiscordAIMessage.init(
       primaryKey: true,
     },
     content: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     authorId: {
