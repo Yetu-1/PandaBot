@@ -15,6 +15,8 @@ import * as EndQuizProducer from "./producers/EndQuizProducer.js";
 import * as MessageConsumer from "./consumers/ToxicityCheckConsumer.js";
 import * as MessageProducer from "./producers/DiscordMsgProducer.js";
 
+import * as DiscordAIMessageConsumer from "./consumers/DiscordAIMessageConsumer.js";
+
 export async function setupRedpanda() {
   try {
     // Create topic
@@ -36,10 +38,11 @@ export async function setupRedpanda() {
     await QuizDBProducer.connect();
     await EndQuizProducer.connect();
     // Initialize consumners to repanda broker and subscribe to specified topic to consume messages
-    await MessageConsumer.init();
+    // await MessageConsumer.init();
     await QuizConsumer.init();
     await QuizDBConsumer.init();
     await EndQuizConsumer.init();
+    await DiscordAIMessageConsumer.init();
     console.log("All redpanda resources connected!");
   } catch (error) {
     console.error("Error setting up redpanda: ", error);
