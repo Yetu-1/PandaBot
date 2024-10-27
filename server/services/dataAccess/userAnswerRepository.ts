@@ -1,7 +1,7 @@
-import { QuizUserAnswer } from "../models.js";
+import { QuizUserResponse } from "../models.js";
 import { db } from "./dbConfig.js";
 
-export async function storeUserAnswer(user_answer: QuizUserAnswer): Promise<boolean> {
+export async function storeUserAnswer(user_answer: QuizUserResponse): Promise<boolean> {
     try{
         await db.query('INSERT INTO "QuizResponses" (user_id, username, quiz_id, number, answer) VALUES ($1, $2, $3, $4, $5)', 
             [user_answer.user_id, user_answer.username, user_answer.quiz_id, user_answer.question_number, user_answer.answer] );

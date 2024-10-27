@@ -2,19 +2,19 @@ import { redpanda } from "../redpanda_config.js";
 import { discord_client } from "../../services/config.js";
 import { getUserAnswers, storeUserAnswer } from "../../services/dataAccess/userAnswerRepository.js";
 import env from "dotenv"
-import { QuizQuestion, QuizUserAnswer } from "../../services/models.js";
+import { QuizQuestion, QuizUserResponse } from "../../services/models.js";
 import { getQuestion, getQuestions } from "../../services/dataAccess/questionRepository.js";
 import { createQuizMessage } from "../../services/createDiscordQuestion.js";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, getUserAgentAppendix } from "discord.js";
+import { createReportEmbeds, createRevisionEmbeds } from "../../services/createEmbeds.js";
+import { calculateUserScore } from "../../services/dataAccess/scoreRepository.js";
+import { getQuizStatus } from "../../services/dataAccess/quizRepository.js";
 env.config();
 
 const groupId = process.env.QUIZ_RESPONSE_GROUP || "default-groupy";
 const topic = process.env.QUIZ_RESPONSE_TOPIC || "default-topic";
 
 const consumer = redpanda.consumer({ groupId });
-const fileds_per_embed = 3;
-const questions_per_embed = 9;
-const questions_per_field = 3;
 
 export async function init() {
   try {
@@ -26,18 +26,29 @@ export async function init() {
       eachMessage: async ({ topic, partition, message }) => {
         const messageObject = JSON.parse(message.value?.toString() || "{}");
         const response = messageObject.answer;
-        // console.log(response);
-        if(response.type === 'answer') {
-          // Save user response into database
-          await storeUserAnswer(response);
-          // console.log("user answer saved!")
-          // send next question
-          await sendNextQuestion(response);
 
-        }else if (response.type == 'participate') {
-          await sendStartQuizPrompt(response);
-        }else if(response.type == 'start') {
-          await sendNextQuestion(response);
+        const quiz = await getQuizStatus(response.quiz_id);
+        console.log(quiz);
+        if(quiz.status == 'active') {
+          // console.log(response);
+          if(response.type === 'answer') {
+            // Save user response into database
+            await storeUserAnswer(response);
+            // console.log("user answer saved!")
+            // send next question
+            await sendNextQuestion(response);
+
+          }else if (response.type == 'participate') {
+            await sendStartQuizPrompt(response);
+          }else if(response.type == 'start') {
+            await sendNextQuestion(response);
+          }else if(response.type == 'revise') {
+            await sendQuizRevision(response); // send questions and answers for the quiz
+          }
+        }else if( quiz.status == 'done') {
+          await sendMessageToUser(response,`**The ${quiz.title} Quiz is Over**`);
+        }else {
+          await sendMessageToUser(response, "**Could not get quiz for revision**")
         }
       },
     });
@@ -45,8 +56,19 @@ export async function init() {
     console.error("Error initializing end quiz consumer: ", error);
   }
 }
-
-async function sendNextQuestion(lastAnswer: QuizUserAnswer) {
+ 
+async function sendMessageToUser(response: QuizUserResponse, msg: string) {
+  try {
+    const user = await discord_client.users.fetch(response.user_id);
+    if (user) {
+      await user.send(msg);
+      await sendQuizRevision(response); // send questions and answers for the quiz
+    }
+  } catch (error) {
+    console.error("Error sending user msg: ", error);
+  }
+}
+async function sendNextQuestion(lastAnswer: QuizUserResponse) {
     try {
       // Fetch next queston from DB
       const resp = await getQuestion(lastAnswer.quiz_id, Number(lastAnswer.question_number)+1);
@@ -82,7 +104,7 @@ async function sendQuestion(question : any, userId: string) {
   }
 } 
 
-async function sendStartQuizPrompt(quiz: QuizUserAnswer) {  
+async function sendStartQuizPrompt(quiz: QuizUserResponse) {  
   // Create button row for each answer
   const embed = new EmbedBuilder()
   .setColor(0x3498db)
@@ -108,15 +130,18 @@ async function sendStartQuizPrompt(quiz: QuizUserAnswer) {
   }
 }
 
-export async function sendUserAnswerReport(quiz_id: string, user_id: string) {
+async function sendUserAnswerReport(quiz_id: string, user_id: string) {
   try {
     // Get all the questions for the quiz
     const questions = await getQuestions(quiz_id);
     // Get all the user's answers
     const user_answers = await getUserAnswers(quiz_id, user_id);
-    if(questions != 'NONE' && questions != "Error") {
+    // calculate user score
+    const user_score = await calculateUserScore(quiz_id, user_id);
+
+    if(questions != 'NONE' && questions != "Error" && user_score != "Error") {
       // create embeds for the report
-      const embeds = createEmbeds(questions, user_answers);
+      const embeds = createReportEmbeds(questions, user_answers, user_score);
       const report = {
         embeds: embeds
       };
@@ -130,70 +155,23 @@ export async function sendUserAnswerReport(quiz_id: string, user_id: string) {
   }
 }
 
-function createEmbeds(questions : any[], user_answers? : any[]) : EmbedBuilder[] {
-  const length = questions.length;
-  const total_no_of_embeds = Math.ceil(length / questions_per_embed);  // round up
-  // console.log("Total no of Embeds: ", total_no_of_embeds);
-  let total_no_of_fields = Math.ceil(length / questions_per_field); 
-  // console.log("Total no of Fields: ", total_no_of_fields);
-  let current_question : number = 0;
-  let embeds : EmbedBuilder[] = [];
-  const heading = new EmbedBuilder()
-  .setColor(0x3498db)
-  .setTitle("Thats a wrap!")
-  .setDescription('Time to see how you did.\n\n**Review Questions**')
-  embeds.push(heading);
-
-  for(let i = 0; i < total_no_of_embeds; i++) {
-    const embed = new EmbedBuilder();
-    for(let j = 0; j < fileds_per_embed && total_no_of_fields > 0; j++) {
-      // Slice the array into a subarray of a set of 4 questions and add them to a field
-      let curr_set : string = questions.slice(current_question, current_question+questions_per_field).map((question : any, index : number) => {
-        const question_number = current_question + index + 1;
-        let answer = '';
-        return (
-          `(${question_number}) ${question.question}\n` + 
-          question.options.map((option : string, index:number) => {
-            const opt_text = ` (${index+1}) ${option} `;
-            if(user_answers) {
-              // filter the array for the user's answer that corresponds to the current question
-              const user_answer = user_answers.filter((answer : any) => (question_number) == answer.number);
-              let suffix = ''
-              // check if the current option is the correct answer and add the check to indicate that
-              if(index+1 == question.answer )
-                suffix = '✅';
-              
-              else if(index+1 == user_answer[0].answer && index+1 != question.answer) // if the current option is the user's answer and also the current option
-                suffix = '❌';
-              return ( opt_text + suffix)
-            }else {
-              if(index+1 == question.answer )
-                answer = option;
-
-              return opt_text;
-            }
-          })
-          .join('\n')
-          + `${(user_answers)? "" : `\n\nAns: ${answer}`}`
-        )
-      }).join('\n\n')
-
-      curr_set = `\`\`\`\n${curr_set}\n\`\`\`` // put the current set of questions in a code block
-      // add field containing 4 questions to the embed
-      embed.addFields(
-        {
-            name: "...",
-            value: curr_set
-        }
-      )
-      current_question += questions_per_field;
-      total_no_of_fields--;
+async function sendQuizRevision(response: QuizUserResponse) {
+  const user = await discord_client.users.fetch(response.user_id);
+  // Get all the questions for the quiz
+  const questions = await getQuestions(response.quiz_id);
+  if(questions != 'NONE' && questions != "Error") {
+    const embeds = createRevisionEmbeds(questions);
+    const quiz = {
+      embeds: embeds
+    };
+    if (user) {
+      await user.send(quiz);
     }
-    // add the embed to the list of embeds
-    embeds.push(embed);
+  }else {
+    if (user) {
+      await user.send("Could not send quiz revision!");
+    }
   }
-
-  return embeds;
 }
 
 export async function disconnect() {
