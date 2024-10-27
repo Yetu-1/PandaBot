@@ -1,10 +1,10 @@
 import { discord_client } from "./services/config.js";
 import { setupRedpanda, disconnectRedpanda } from "./redpanda/redpandaManager.js";
-// import generateAnswerForDiscordBotAI from "./services/generateAnswerForDiscordBotAI.js";
+import generateAnswerForDiscordBotAI from "./services/generateAnswerForDiscordBotAI.js";
 import { registerCommands } from "./services/registerCommands.js";
 import { sendUserResponse } from "./services/sendUserResponse.js";
 import { sendQuizRequest } from "./services/sendQuizRequest.js";
-import * as MessageProducer from "./redpanda/producers/DiscordMsgProducer.js";
+// import * as MessageProducer from "./redpanda/producers/DiscordMsgProducer.js";
 
 
 
@@ -58,19 +58,18 @@ discord_client.on("interactionCreate", async (interaction) => {
     if (interaction.commandName == "start-quiz") {
       // send quiz request
       await sendQuizRequest(interaction);
-    } 
-    //else if (interaction.commandName == "ask-ai-anything") {
-    //   const aiAnswer = await generateAnswerForDiscordBotAI(
-    //     interaction.options.get("question")?.value?.toString() ||
-    //       "Could not generate AI answer"
-    //   );
-    //   if (aiAnswer.status == "success") {
-    //     interaction.reply(aiAnswer.answer);
-    //   } else {
-    //     interaction.reply(`Could not generate AI answer
-    //       reason: ${aiAnswer.error}`);
-    //   }
-    // }
+    } else if (interaction.commandName == "ask-ai-anything") {
+      const aiAnswer = await generateAnswerForDiscordBotAI(
+        interaction.options.get("question")?.value?.toString() ||
+          "Could not generate AI answer"
+      );
+      if (aiAnswer.status == "success") {
+        interaction.reply(aiAnswer.answer);
+      } else {
+        interaction.reply(`Could not generate AI answer
+          reason: ${aiAnswer.error}`);
+      }
+    }
   }
 });
 
