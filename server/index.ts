@@ -5,6 +5,10 @@ import {
   setupRedpanda,
 } from "./redpanda/redpandaManager.js";
 import { discord_client } from "./services/config.js";
+import {
+  DiscordGuild,
+  initializeDatabase,
+} from "./services/dataAccess/dbModels.js";
 import generateAnswerForDiscordBotAI from "./services/generateAnswerForDiscordBotAI.js";
 import { registerCommands } from "./services/registerCommands.js";
 import { sendQuizRequest } from "./services/sendQuizRequest.js";
@@ -24,10 +28,12 @@ app.listen(port, () => {
 async function setupServer() {
   try {
     // setup redpanda producers and consumers
-    await setupRedpanda();
+    setupRedpanda();
+
     // Login discord bot
     discord_client.login(process.env.DISCORD_TOKEN);
-    registerCommands(process.env.DISCORD_BOT_ID!);
+
+    initializeDatabase();
   } catch (error) {
     console.error("InitializeError:", error);
   }
@@ -42,10 +48,14 @@ discord_client.on("ready", async () => {
 discord_client.on("guildCreate", async (guild) => {
   try {
     console.log(`Guild ${guild.id} has added pandabot`);
-    // register guild
     await registerCommands(guild.id);
+
+    const discordGuild = await DiscordGuild.create({
+      id: guild.id,
+      name: guild.name,
+    });
   } catch (error) {
-    console.error("Error registering commands on guid create: ", error);
+    console.error("Error registering commands on guild create: ", error);
   }
 });
 
