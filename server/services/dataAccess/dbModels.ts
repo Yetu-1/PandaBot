@@ -24,6 +24,53 @@ export const DiscordGuild = sequelize.define("guild", {
   },
 });
 
+
+export const DiscordAIMessage = sequelize.define("discord_ai_message", {
+  id: {
+    type: DataTypes.STRING,
+    primaryKey: true,
+  },
+  content: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  authorId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  conversationId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+});
+
+export const Conversation = sequelize.define("conversation", {
+  id: {
+    type: DataTypes.UUID,
+    primaryKey: true,
+  },
+  channelId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  guildId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  messages: {
+    type: DataTypes.ARRAY(),
+    allowNull: true,
+  },
+});
+
+Conversation.hasMany(DiscordAIMessage, {
+  foreignKey: "conversationId",
+  as: "messages",
+});
+DiscordAIMessage.belongsTo(Conversation, {
+  foreignKey: "conversationId",
+});
+
 export const initializeDatabase = async () => {
   try {
     await sequelize.authenticate();
