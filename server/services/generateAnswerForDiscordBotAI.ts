@@ -16,7 +16,7 @@ async function generateAnswerForDiscordBotAI(
         error: "Prompt is empty",
       });
     try {
-      const systemPromptPath = "services/generateAIAnswerPrompt.txt";
+      const systemPromptPath = "services/prompts/generateAIAnswerPrompt.txt";
       const systemPrompt = fs.readFileSync(systemPromptPath, "utf-8");
       const completion = await openai.chat.completions.create({
         messages: [
