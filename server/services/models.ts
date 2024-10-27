@@ -42,7 +42,7 @@ export interface QuizEntry {
   channel_id: string
 }
 
-export interface QuizUserAnswer {
+export interface QuizUserResponse {
   user_id: string;
   username: string;
   quiz_id: string;

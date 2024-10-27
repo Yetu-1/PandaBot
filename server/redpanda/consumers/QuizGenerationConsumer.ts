@@ -74,12 +74,17 @@ async function sendParticpateButton(quiz: Quiz, quiz_id: string, channel_id: str
   .setColor(0x3498db)
   .setTitle(`Join the ${quiz.title} quiz now!`)
 
-  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-    .setCustomId(`qz:${quiz_id}:participate`)
-    .setLabel('Participate')
-    .setStyle(ButtonStyle.Primary)
-  );
+  const participate_button = new ButtonBuilder()
+  .setCustomId(`qz:${quiz_id}:participate`)
+  .setLabel('Participate')
+  .setStyle(ButtonStyle.Primary)
+
+  const revise_button = new ButtonBuilder()
+  .setCustomId(`qz:${quiz_id}:revise`)
+  .setLabel('Revise')
+  .setStyle(ButtonStyle.Secondary)
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents([participate_button, revise_button]);
 
   const message = {
     embeds: [embed],
