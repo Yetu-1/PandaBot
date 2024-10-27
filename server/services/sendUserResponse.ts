@@ -1,5 +1,5 @@
 import { ButtonInteraction } from "discord.js";
-import { QuizUserAnswer } from "./models.js";
+import { QuizUserResponse} from "./models.js";
 
 import * as QuizProducer from "../redpanda/producers/QuizResponseProducer.js";
 
@@ -8,7 +8,7 @@ export async function sendUserResponse(interaction: ButtonInteraction) {
   // filter by quiz button. structure of quiz button = 'qz:quizid:qn:ans' or 'qz:quizid:participate for participate button
   if (params[0] != "qz" && params.length <= 0) return;
 
-  if (params[2] == "participate" || params[2] == "start") {
+  if (params[2] == "participate" || params[2] == "start" || params[2] == "revise") {
     if (params[2] == "participate") {
       await interaction.reply({
         content: "Check your dm for the start quiz button",
@@ -21,7 +21,7 @@ export async function sendUserResponse(interaction: ButtonInteraction) {
       );
       message?.delete();
     }
-    const user_response: QuizUserAnswer = {
+    const user_response: QuizUserResponse = {
       user_id: interaction.user.id,
       username: interaction?.user.globalName || "",
       quiz_id: params[1],
@@ -37,7 +37,7 @@ export async function sendUserResponse(interaction: ButtonInteraction) {
     );
     message?.delete();
 
-    const user_response: QuizUserAnswer = {
+    const user_response: QuizUserResponse = {
       user_id: interaction.user.id,
       username: interaction.user.globalName || "",
       quiz_id: params[1],

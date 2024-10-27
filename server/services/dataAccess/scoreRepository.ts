@@ -14,10 +14,9 @@ export async function storeScore(score: Score) : Promise<boolean>{
     }
 }
 
-export async function calculateScores(quiz_id : string ) : Promise<boolean> {
+export async function calculateScores(quiz_id : string) : Promise<boolean> {
     console.log("Calculating Scores!"); 
     try{
-        // TODO: error handling
         const answers = await getAnswers(quiz_id);
         console.log(answers);
         // Get all unique users who participated in the quiz
@@ -64,4 +63,21 @@ export async function getScores(quiz_id : string) {
         console.error("Error fetching score: ", err)
         return "Error"
     }  
+}
+
+// calculate user's score without saving in db
+export async function calculateUserScore(quiz_id: string, user_id: string ) : Promise<any> {
+    console.log("Calculating Scores!"); 
+    try{
+        const answers = await getAnswers(quiz_id);
+        console.log(answers);
+        // Get user's answers
+        const user_answers = await getUserAnswers(quiz_id , user_id);
+        // use qusetions to calculate user score
+        const score = calcUserScore(answers, user_answers);
+        return score;
+    }catch(error) {
+        console.error("Error calculating scores: ", error);
+        return "Error";
+    }
 }
