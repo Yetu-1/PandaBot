@@ -37,7 +37,9 @@ export async function init() {
           "messageId:",
           messageJSON.id,
           "channelId:",
-          messageJSON.channelId
+          messageJSON.channelId,
+          "messageJSON:",
+          messageJSON
         );
         const messageObject = await fetchMessage(
           messageJSON.id,
