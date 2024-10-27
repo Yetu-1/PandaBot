@@ -1,4 +1,12 @@
-deploy:
+name: Deploy to Heroku
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
