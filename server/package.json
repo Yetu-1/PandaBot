@@ -32,10 +32,10 @@
     "uuid": "^10.0.0",
     "@types/express": "^5.0.0",
     "@types/pg": "^8.11.10",
-    "@types/uuid": "^10.0.0"
-  },
-  "devDependencies": {
+    "@types/uuid": "^10.0.0",
     "sequelize": "^6.37.4",
     "sequelize-cli": "^6.6.2"
+  },
+  "devDependencies": {
   }
 }
