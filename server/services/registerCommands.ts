@@ -41,6 +41,8 @@ const commands = [
   {
     name: "ask-ai-anything",
     description: "Ask AI anything",
+    interaction_types: [0, 1],
+    context: [0, 1, 2],
     options: [
       {
         name: "question",
