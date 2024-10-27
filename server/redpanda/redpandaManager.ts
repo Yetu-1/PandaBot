@@ -1,7 +1,7 @@
 import * as Admin from "./admin.js";
 
-import * as MessageConsumer from "./consumers/ToxicityCheckConsumer.js";
-import * as MessageProducer from "./producers/DiscordMsgProducer.js";
+// import * as MessageConsumer from "./consumers/ToxicityCheckConsumer.js";
+// import * as MessageProducer from "./producers/DiscordMsgProducer.js";
 
 import * as QuizConsumer from "./consumers/QuizResponseConsumer.js";
 import * as QuizProducer from "./producers/QuizResponseProducer.js";
@@ -23,12 +23,12 @@ export async function setupRedpanda() {
         const end_quiz_topic = process.env.END_QUIZ_TOPIC || "default-topic";
         await Admin.createTopic([quiz_topic, quiz_db_topic, discord_msg_topic, end_quiz_topic]);
         // Connect producers to repanda broker
-        await MessageProducer.connect();
+        // await MessageProducer.connect();
         await QuizProducer.connect();
         await QuizDBProducer.connect();
         await EndQuizProducer.connect();
         // Initialize consumners to repanda broker and subscribe to specified topic to consume messages
-        await MessageConsumer.init();
+        // await MessageConsumer.init();
         await QuizConsumer.init();
         await QuizDBConsumer.init();
         await EndQuizConsumer.init();
@@ -41,8 +41,8 @@ export async function setupRedpanda() {
 export async function disconnectRedpanda() {
     try{
         // Disconnect producers and consumers from repanda broker
-        await MessageProducer.disconnect();
-        await MessageConsumer.disconnect();
+        // await MessageProducer.disconnect();
+        // await MessageConsumer.disconnect();
         await QuizProducer.disconnect();
         await QuizConsumer.disconnect();
         await QuizDBProducer.disconnect();

@@ -42,7 +42,7 @@ discord_client.on("messageCreate", async (message) => {
   try {
     if (!message?.author.bot) {
       // send discord message to redpanda broker
-      await MessageProducer.sendMessage(message);
+      // await MessageProducer.sendMessage(message);
     }
   } catch (error) {
     console.error("onMessageCreateError:", error);
