@@ -1,4 +1,5 @@
 import express from "express";
+import * as MessageProducer from "./redpanda/producers/DiscordMsgProducer.js";
 import {
   disconnectRedpanda,
   setupRedpanda,
