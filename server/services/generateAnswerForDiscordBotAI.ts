@@ -4,6 +4,11 @@ import { AIAnswerDiscord } from "./models.js";
 
 const openai = new OpenAI();
 
+function getSystemPrompt() {
+  const systemPromptPath = "services/prompts/generateAIAnswerPrompt.txt";
+  return fs.readFileSync(systemPromptPath, "utf-8");
+}
+
 export async function generateAnswerForDiscordBotAI(
   prompt: string
 ): Promise<AIAnswerDiscord> {
@@ -16,13 +21,11 @@ export async function generateAnswerForDiscordBotAI(
         error: "Prompt is empty",
       });
     try {
-      const systemPromptPath = "services/prompts/generateAIAnswerPrompt.txt";
-      const systemPrompt = fs.readFileSync(systemPromptPath, "utf-8");
       const completion = await openai.chat.completions.create({
         messages: [
           {
             role: "system",
-            content: systemPrompt,
+            content: getSystemPrompt(),
           },
           {
             role: "user",
@@ -67,7 +70,10 @@ export async function continueConversation(
       });
     try {
       const completion = await openai.chat.completions.create({
-        messages: messages,
+        messages: messages.concat({
+          role: "system",
+          content: getSystemPrompt(),
+        }),
         model: "gpt-4o-mini",
       });
 
