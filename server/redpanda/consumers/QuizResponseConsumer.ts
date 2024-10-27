@@ -8,6 +8,7 @@ import { createQuizMessage } from "../../services/createDiscordQuestion.js";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, getUserAgentAppendix } from "discord.js";
 import { createReportEmbeds, createRevisionEmbeds } from "../../services/createEmbeds.js";
 import { calculateUserScore } from "../../services/dataAccess/scoreRepository.js";
+import { getQuizStatus } from "../../services/dataAccess/quizRepository.js";
 env.config();
 
 const groupId = process.env.QUIZ_RESPONSE_GROUP || "default-groupy";
@@ -25,20 +26,29 @@ export async function init() {
       eachMessage: async ({ topic, partition, message }) => {
         const messageObject = JSON.parse(message.value?.toString() || "{}");
         const response = messageObject.answer;
-        // console.log(response);
-        if(response.type === 'answer') {
-          // Save user response into database
-          await storeUserAnswer(response);
-          // console.log("user answer saved!")
-          // send next question
-          await sendNextQuestion(response);
 
-        }else if (response.type == 'participate') {
-          await sendStartQuizPrompt(response);
-        }else if(response.type == 'start') {
-          await sendNextQuestion(response);
-        }else if(response.type == 'revise') {
-          await sendQuizRevision(response); // send questions and answers for the quiz
+        const quiz = await getQuizStatus(response.quiz_id);
+        console.log(quiz);
+        if(quiz.status == 'active') {
+          // console.log(response);
+          if(response.type === 'answer') {
+            // Save user response into database
+            await storeUserAnswer(response);
+            // console.log("user answer saved!")
+            // send next question
+            await sendNextQuestion(response);
+
+          }else if (response.type == 'participate') {
+            await sendStartQuizPrompt(response);
+          }else if(response.type == 'start') {
+            await sendNextQuestion(response);
+          }else if(response.type == 'revise') {
+            await sendQuizRevision(response); // send questions and answers for the quiz
+          }
+        }else if( quiz.status == 'done') {
+          await sendMessageToUser(response,`**The ${quiz.title} Quiz is Over**`);
+        }else {
+          await sendMessageToUser(response, "**Could not get quiz for revision**")
         }
       },
     });
@@ -46,7 +56,18 @@ export async function init() {
     console.error("Error initializing end quiz consumer: ", error);
   }
 }
-
+ 
+async function sendMessageToUser(response: QuizUserResponse, msg: string) {
+  try {
+    const user = await discord_client.users.fetch(response.user_id);
+    if (user) {
+      await user.send(msg);
+      await sendQuizRevision(response); // send questions and answers for the quiz
+    }
+  } catch (error) {
+    console.error("Error sending user msg: ", error);
+  }
+}
 async function sendNextQuestion(lastAnswer: QuizUserResponse) {
     try {
       // Fetch next queston from DB
@@ -148,7 +169,7 @@ async function sendQuizRevision(response: QuizUserResponse) {
     }
   }else {
     if (user) {
-      await user.send("Could not fetch Quiz!");
+      await user.send("Could not send quiz revision!");
     }
   }
 }

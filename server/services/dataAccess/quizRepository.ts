@@ -49,17 +49,17 @@ export async function getQuiz(quiz_id: string) : Promise<any> {
     }
 }
 
-export async function getQuizStatus(quiz_id : string) {
+export async function getQuizStatus(quiz_id : string) : Promise<any> {
     try {
-        const resp = await db.query('SELECT status FROM "Quizzes" WHERE id=$1', [quiz_id])
+        const resp = await db.query('SELECT status,title FROM "Quizzes" WHERE id=$1', [quiz_id])
         if(resp.rows.length > 0) {
-            return resp.rows[0];
+            return { status: resp.rows[0].status, title: resp.rows[0].title};
         }else {
-            return "Null";
+            return {status: "Null", title: ""};
         }
     }catch (err) {
         console.error("Error fetching quiz status: ", err);
-        return "Error";
+        return {tatus: "Null", title: ""};;
     }
 }
 
