@@ -31,6 +31,9 @@ jobs:
 
     - name: Set Heroku remote
       run: heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
+    
+    - name: Test Heroku remote
+      run: git remote -v
 
     - name: Deploy to Heroku
       env:
