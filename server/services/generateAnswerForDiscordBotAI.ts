@@ -70,10 +70,16 @@ export async function continueConversation(
       });
     try {
       const completion = await openai.chat.completions.create({
-        messages: messages.concat({
-          role: "system",
-          content: getSystemPrompt(),
-        }),
+        messages: messages.concat([
+          {
+            role: "system",
+            content: getSystemPrompt(),
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ]),
         model: "gpt-4o-mini",
       });
 
