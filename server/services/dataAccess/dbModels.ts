@@ -57,10 +57,6 @@ export const Conversation = sequelize.define("conversation", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  messages: {
-    type: DataTypes.ARRAY(),
-    allowNull: true,
-  },
 });
 
 Conversation.hasMany(DiscordAIMessage, {
