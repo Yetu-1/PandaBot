@@ -13,6 +13,9 @@ async function fetchMessage(
   id: string,
   channelId: string
 ): Promise<Message | undefined> {
+  if (!id || !channelId) {
+    throw new Error("Message ID or Channel ID is undefined");
+  }
   const channel = await discord_client.channels.fetch(channelId);
 
   if (channel && channel.isTextBased()) {
@@ -28,8 +31,14 @@ export async function init() {
     await consumer.subscribe({ topic: topic });
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
-        let messageJSON = JSON.parse(message.value?.toString() || "{}");
+        const messageJSON = JSON.parse(message.value?.toString() || "{}");
 
+        console.log(
+          "messageId:",
+          messageJSON.id,
+          "channelId:",
+          messageJSON.channelId
+        );
         const messageObject = await fetchMessage(
           messageJSON.id,
           messageJSON.channelId
