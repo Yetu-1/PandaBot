@@ -24,6 +24,12 @@ jobs:
     - name: Build the project
       run: npm run build --prefix server
 
+    - name: Update Heroku CLI
+      run: npm install -g heroku
+
+    - name: Verify Heroku remote
+      run: git remote -v
+      
     - name: Deploy to Heroku
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
