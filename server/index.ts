@@ -6,10 +6,12 @@ import {
 } from "./redpanda/redpandaManager.js";
 import { discord_client } from "./services/config.js";
 import {
+  Conversation,
+  DiscordAIMessage,
   DiscordGuild,
   initializeDatabase,
 } from "./services/dataAccess/dbModels.js";
-import generateAnswerForDiscordBotAI from "./services/generateAnswerForDiscordBotAI.js";
+import { generateAnswerForDiscordBotAI } from "./services/generateAnswerForDiscordBotAI.js";
 import { registerCommands } from "./services/registerCommands.js";
 import { sendQuizRequest } from "./services/sendQuizRequest.js";
 import { sendUserResponse } from "./services/sendUserResponse.js";
@@ -97,8 +99,31 @@ discord_client.on("interactionCreate", async (interaction) => {
         interaction.options.get("question")?.value?.toString() ||
           "Could not generate AI answer"
       )
-        .then((aiAnswer) => {
+        .then(async (aiAnswer) => {
           response.edit(aiAnswer.answer);
+          const conversation = await Conversation.create({
+            channelId: interaction.channelId,
+            guildId: interaction.guildId,
+          });
+
+          //AI message
+          const messageReply = await interaction.fetchReply();
+          await DiscordAIMessage.create({
+            id: messageReply.id,
+            content: aiAnswer.answer,
+            authorId: messageReply.author.id,
+            conversationId: conversation.id,
+            role: "assistant",
+          });
+
+          //user message
+          await DiscordAIMessage.create({
+            id: interaction.id,
+            content: aiAnswer.question,
+            authorId: interaction.user.id,
+            conversationId: conversation.id,
+            role: "user",
+          });
         })
         .catch((err) => {
           console.error("Error generating AI answer:", err);

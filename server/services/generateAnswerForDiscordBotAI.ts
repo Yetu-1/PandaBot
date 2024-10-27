@@ -4,7 +4,7 @@ import { AIAnswerDiscord } from "./models.js";
 
 const openai = new OpenAI();
 
-async function generateAnswerForDiscordBotAI(
+export async function generateAnswerForDiscordBotAI(
   prompt: string
 ): Promise<AIAnswerDiscord> {
   return new Promise(async (resolve, reject) => {
@@ -49,4 +49,44 @@ async function generateAnswerForDiscordBotAI(
   });
 }
 
-export default generateAnswerForDiscordBotAI;
+export async function continueConversation(
+  prompt: string,
+  messages: {
+    role: "user" | "assistant" | "system";
+    content: string;
+  }[]
+): Promise<AIAnswerDiscord> {
+  return new Promise(async (resolve, reject) => {
+    if (prompt === "")
+      reject({
+        question: "",
+        status: "failure",
+        answer: "",
+        error: "Prompt is empty",
+      });
+    try {
+      const completion = await openai.chat.completions.create({
+        messages: messages,
+        model: "gpt-4o-mini",
+      });
+
+      const discordAnswer: AIAnswerDiscord = JSON.parse(
+        completion.choices[0].message.content!
+      );
+
+      if(discordAnswer.status === "failure") {
+        reject(discordAnswer);
+      }
+
+      resolve(discordAnswer);
+    } catch (err) {
+      console.error("GenerateAIAnswerError:", err);
+      reject({
+        question: "",
+        status: "failure",
+        answer: "",
+        error: (err as Error).message,
+      });
+    }
+  });
+}

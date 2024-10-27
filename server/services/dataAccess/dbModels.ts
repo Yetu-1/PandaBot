@@ -1,5 +1,6 @@
 import env from "dotenv";
-import { DataTypes, Sequelize } from "sequelize";
+import { DataTypes, Model, Sequelize } from "sequelize";
+import { v4 as uuidv4 } from "uuid";
 
 env.config();
 
@@ -15,54 +16,100 @@ const sequelize = new Sequelize(process.env.DATABASE_URL!, {
   protocol: "postgres",
 });
 
-export const DiscordGuild = sequelize.define("guild", {
-  id: {
-    type: DataTypes.STRING,
-    primaryKey: true,
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  prefix: {
-    type: DataTypes.STRING,
-    defaultValue: "/",
-  },
-});
+export class DiscordGuild extends Model {
+  public id!: string;
+  public name!: string;
+  public prefix!: string;
+}
 
+DiscordGuild.init(
+  {
+    id: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    prefix: {
+      type: DataTypes.STRING,
+      defaultValue: "/",
+    },
+  },
+  {
+    sequelize,
+    modelName: "guild",
+  }
+);
 
-export const DiscordAIMessage = sequelize.define("discord_ai_message", {
-  id: {
-    type: DataTypes.STRING,
-    primaryKey: true,
-  },
-  content: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  authorId: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  conversationId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
-});
+export class DiscordAIMessage extends Model {
+  public id!: string;
+  public content!: string;
+  public authorId!: string;
+  public conversationId!: string;
+  public role!: 'user' | 'assistant' | 'system';
+}
 
-export const Conversation = sequelize.define("conversation", {
-  id: {
-    type: DataTypes.UUID,
-    primaryKey: true,
+DiscordAIMessage.init(
+  {
+    id: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+    },
+    content: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    authorId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    conversationId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
+    role: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "user",
+    },
   },
-  channelId: {
-    type: DataTypes.STRING,
-    allowNull: true,
+  {
+    sequelize,
+    modelName: "discord_ai_message",
+  }
+);
+
+export class Conversation extends Model {
+  public id!: string;
+  public channelId!: string;
+  public guildId!: string;
+}
+
+Conversation.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+    },
+    channelId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    guildId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
-  guildId: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
+  {
+    sequelize,
+    modelName: "conversation",
+  }
+);
+
+Conversation.beforeCreate((conversation: any) => {
+  conversation.id = uuidv4();
 });
 
 Conversation.hasMany(DiscordAIMessage, {
@@ -77,8 +124,6 @@ export const initializeDatabase = async () => {
   try {
     await sequelize.authenticate();
     console.log("Connection has been established successfully.");
-    await sequelize.sync();
-    console.log("Database synchronized.");
   } catch (error) {
     console.error("Unable to connect to the database:", error);
   }
