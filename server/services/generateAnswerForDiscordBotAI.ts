@@ -56,6 +56,7 @@ export async function continueConversation(
     content: string;
   }[]
 ): Promise<AIAnswerDiscord> {
+  console.info("ContinueConversationPrompt:", prompt, messages);
   return new Promise(async (resolve, reject) => {
     if (prompt === "")
       reject({
