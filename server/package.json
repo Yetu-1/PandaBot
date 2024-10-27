@@ -8,7 +8,7 @@
     "prestart": "npm run build",
     "start": "node dist/index.js",
     "preserve": "npm run build",
-    "serve": "npx tsc -w & nodemon dist/index.js",
+    "serve": "nodemon dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "npx sequelize-cli db:migrate",
     "down": "npx sequelize-cli db:migrate:undo"
@@ -22,7 +22,6 @@
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "googleapis": "^144.0.0",
     "kafkajs": "^2.2.4",
     "openai": "^4.67.3",
     "pg": "^8.13.0",
