@@ -8,6 +8,7 @@ const topic = process.env.DISCORD_MESSAGES_TOPIC!;
 
 const consumer = redpanda.consumer({ groupId });
 
+
 export async function init() {
   try {
     await consumer.connect();
@@ -17,7 +18,7 @@ export async function init() {
         const messageObject: Message = JSON.parse(
           message.value?.toString() || "{}"
         );
-        if (messageObject.author.bot) return;
+        if (messageObject?.author?.bot) return;
 
         if (messageObject.reference?.messageId != null) {
           const referencedMessage = await DiscordAIMessage.findOne({
