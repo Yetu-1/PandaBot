@@ -5,8 +5,14 @@ env.config();
 
 const sequelize = new Sequelize(process.env.DATABASE_URL!, {
   dialect: "postgres",
+  ssl: true,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
   protocol: "postgres",
-  logging: false,
 });
 
 export const DiscordGuild = sequelize.define("guild", {
