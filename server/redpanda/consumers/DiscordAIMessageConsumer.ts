@@ -42,8 +42,8 @@ export async function init() {
           messageJSON
         );
         const messageObject = await fetchMessage(
-          messageJSON.id,
-          messageJSON.channelId
+          messageJSON.message.id,
+          messageJSON.message.channelId
         );
 
         if (!messageObject || messageObject.author.bot) return;
