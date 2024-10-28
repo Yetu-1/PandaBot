@@ -50,12 +50,8 @@ discord_client.on("ready", async () => {
 discord_client.on("guildCreate", async (guild) => {
   try {
     console.log(`Guild ${guild.id} has added pandabot`);
-    await registerCommands(guild.id);
+    await registerCommands(guild.id); // register commands to the newly added guild
 
-    const discordGuild = await DiscordGuild.create({
-      id: guild.id,
-      name: guild.name,
-    });
   } catch (error) {
     console.error("Error registering commands on guild create: ", error);
   }
