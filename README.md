@@ -80,14 +80,14 @@ To set up PandaBot:
    ```
 
 4. **Set up Redpanda**:  
-   You can use [Redpanda Cloud](https://redpanda.com/cloud) for managed setup or install Redpanda locally with Docker following the [Docker setup guide](https://docs.redpanda.com/docs/get-started/quick-start-docker/).
+   You can use[Redpanda Cloud Serverless](https://www.redpanda.com/redpanda-cloud/serverless) for managed setup or install Redpanda locally with Docker following the [Docker setup guide](https://docs.redpanda.com/current/get-started/quick-start/)..
 
 5. **Set up the Discord bot**:  
    Register your bot on the [Discord Developer Portal](https://discord.com/developers/applications), retrieve the bot token, and configure it for your server. Refer to the [Discord.js Guide](https://discordjs.guide/) for additional setup instructions.
 
 6. **Set up your database**:
    - Ensure a Postgres database is running locally or on a server.
-   - Provide the Postgres credentials in the `.env` file (as shown above under `DATABASE_URL`).
+   - Provide the Postgres credentials in the `.env` file (as shown above).
 
 7. **Run PandaBot**:
    ```sh
