@@ -42,13 +42,41 @@ To set up PandaBot:
    ```
 
 3. **Set up environment variables**:  
-   Create an `.env` file at the root level of the project and provide the following environment variables:
+   Create an `.env` file at the root level of the project with the following environment variables:
 
    ```plaintext
-   DISCORD_TOKEN=your_discord_token
-   OPENAI_API_KEY=your_openai_api_key
-   REDPANDA_BROKER=your_redpanda_broker_url
-   DATABASE_URL=your_database_url
+   # Discord Bot Credentials
+   DISCORD_TOKEN="your_discord_token"
+   DISCORD_BOT_ID="your_discord_bot_id"
+
+   # Google API Credentials
+   GOOGLE_API_KEY="your_google_api_key"
+   DISCOVERY_URL="https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1"
+
+   # Redpanda Credentials
+   KAFKA_BROKERS="your_kafka_broker_url"
+   KAFKA_USERNAME="your_kafka_username"
+   KAFKA_PASSWORD="your_kafka_password"
+
+   # Topics and Groups
+   DISCORD_MESSAGES_TOPIC="discord-messages"
+   MESSAGE_GROUP_ID="msg-group"
+   QUIZ_DB_TOPIC="save-quiz-topic"
+   QUIZ_DB_GROUP_ID="save-quiz-group"
+   QUIZ_RESPONSE_TOPIC="quiz-responses"
+   QUIZ_RESPONSE_GROUP="quiz-response-group"
+   END_QUIZ_TOPIC="end-quiz"
+   END_QUIZ_GROUP_ID="end-quiz-group"
+
+   # OpenAI API
+   OPENAI_API_KEY="your_openai_api_key"
+
+   # Database Credentials
+   DB_USER="your_db_user"
+   DB_HOST="your_db_host"
+   DB_NAME="your_db_name"
+   DB_PASSWORD="your_db_password"
+   NODE_ENV="development"
    ```
 
 4. **Set up Redpanda**:  
@@ -63,6 +91,7 @@ To set up PandaBot:
 
 7. **Run PandaBot**:
    ```sh
+   cd server
    npm run serve
    ```
 
