@@ -63,11 +63,6 @@ discord_client.on("guildCreate", async (guild) => {
 
 discord_client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
-  if (
-    message.channel.id === process.env.DEV_CHANNEL_ID &&
-    "production" === process.env.NODE_ENV
-  )
-    return;
   try {
     if (!message?.author.bot) {
       // send discord message to redpanda broker
@@ -79,11 +74,6 @@ discord_client.on("messageCreate", async (message) => {
 });
 
 discord_client.on("interactionCreate", async (interaction) => {
-  if (
-    interaction.channelId === process.env.DEV_CHANNEL_ID &&
-    "production" === process.env.NODE_ENV
-  )
-    return;
   if (interaction.isButton()) {
     // Send user response to redpanda broker
     await sendUserResponse(interaction);
