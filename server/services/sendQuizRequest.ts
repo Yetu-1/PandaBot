@@ -23,7 +23,7 @@ export async function sendQuizRequest(interaction: ChatInputCommandInteraction) 
 
       const time = duration.value as number;
       interaction.reply(
-        `The quiz is about to start. Duration: ${duration.value} minutes!`
+        `📢 **The quiz is about to start!**\n\n⏳ **Duration:** ${duration.value} minutes.\n\nPlease wait a moment while the quiz is being generated. A **Participate** button will be sent shortly!`
       );
       // send quiz to quiz generation consumer to generate, store and start quiz
       await QuizDBProducer.sendQuiz(

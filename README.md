@@ -12,19 +12,13 @@ PandaBot is a Discord bot designed to make study sessions interactive, fun, and 
 - **How it Works**: Enter `/start-quiz`, upload the file(s), and fill in the options. PandaBot will process the file(s) and generate a quiz based on the content.
 - **Example Flow**:
   - **Step 1**: Run `/start-quiz`, select quiz options.
-  - **Step 2**: PandaBot generates the quiz and prompts you to participate.
-  - **Step 3**: Users receive an interactive quiz with options to join or revise. Clicking "Join" starts the quiz, showing questions like those below.
+  - **Step 2**: PandaBot generates the quiz and prompts you to participate or revise questions.
+  - **Step 3**: Users receive an interactive quiz with options to start. Clicking "Start" starts the quiz.
   - **Step 4**: At quiz end, you receive a score summary and question review.
 
 ### 2. `/ask-ai-anything`
 - **Description**: This command uses OpenAI’s GPT-4 model to answer any question entered by the user.
 - **Example**: `/ask-ai-anything`: “What are complementary colors?” – PandaBot replies with an AI-generated answer.
-
-## At a Glance
-
-| Demo #1                       | Demo #2                       |
-| ----------------------------- | ----------------------------- |
-| ![](/examples/demo1.png)      | ![](/examples/demo2.png)      |
 
 ## Getting Started
 
@@ -96,3 +90,5 @@ To set up PandaBot:
    ```
 
 PandaBot is now ready to power up your study sessions on Discord!
+
+Try Pandabot [Link](https://quiz-panda-6c4e5181c3b1.herokuapp.com)

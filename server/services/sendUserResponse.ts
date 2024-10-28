@@ -11,7 +11,7 @@ export async function sendUserResponse(interaction: ButtonInteraction) {
   if (params[2] == "participate" || params[2] == "start" || params[2] == "revise") {
     if (params[2] == "participate"  || params[2] == "revise") {
       await interaction.reply({
-        content: `**Check your dm for the ${(params[2] == "participate")? "start quiz button**" : "questions and answers"}`,
+        content: `**Check your dm for the ${(params[2] == "participate")? "start quiz button**" : "questions and answers**"}`,
         ephemeral: true,
       });
     } else {
