@@ -22,9 +22,9 @@ PandaBot is a Discord bot designed to make study sessions interactive, fun, and 
 
 ## At a Glance
 
-| Demo #1                       | Demo #2                       |
+| question #1                       | Dem #2                       |
 | ----------------------------- | ----------------------------- |
-| ![](/examples/demo1.png)      | ![](/examples/demo2.png)      |
+| ![](./screenshots/question.png)      | ![](./review/screenshots/)      |
 
 ## Getting Started
 
@@ -96,3 +96,5 @@ To set up PandaBot:
    ```
 
 PandaBot is now ready to power up your study sessions on Discord!
+
+Try Pandabot [Link](https://quiz-panda-6c4e5181c3b1.herokuapp.com)
