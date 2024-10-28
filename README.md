@@ -19,6 +19,7 @@ PandaBot is a Discord bot designed to make study sessions interactive, fun, and 
 ### 2. `/ask-ai-anything`
 - **Description**: This command uses OpenAI’s GPT-4 model to answer any question entered by the user.
 - **Example**: `/ask-ai-anything`: “What are complementary colors?” – PandaBot replies with an AI-generated answer.
+- You could also continue a conversation by replying to the bot's response 
 
 ## Getting Started
 
