@@ -5,13 +5,13 @@ import * as QuizProducer from "../redpanda/producers/QuizResponseProducer.js";
 
 export async function sendUserResponse(interaction: ButtonInteraction) {
   const params = interaction.customId.split(":");
-  // filter by quiz button. structure of quiz button = 'qz:quizid:qn:ans' or 'qz:quizid:participate for participate button
+  // filter by quiz button. structure of quiz button = 'qz:quizid:qn:ans' or 'qz:quizid:participate / start / revise buttons
   if (params[0] != "qz" && params.length <= 0) return;
 
   if (params[2] == "participate" || params[2] == "start" || params[2] == "revise") {
-    if (params[2] == "participate") {
+    if (params[2] == "participate"  || params[2] == "revise") {
       await interaction.reply({
-        content: "Check your dm for the start quiz button",
+        content: `**Check your dm for the ${(params[2] == "participate")? "start quiz button**" : "questions and answers"}`,
         ephemeral: true,
       });
     } else {
