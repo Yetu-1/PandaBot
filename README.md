@@ -83,6 +83,11 @@ To set up PandaBot:
 6. **Set up your database**:
    - Ensure a Postgres database is running locally or on a server.
    - Provide the Postgres credentials in the `.env` file (as shown above).
+   - run migrations
+   ```sh
+   cd server
+   npm run migrate
+   ```
 
 7. **Run PandaBot**:
    ```sh
